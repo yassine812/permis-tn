@@ -1,6 +1,6 @@
 # Construire l'app iPhone depuis Windows
 
-État : workflow préparé et syntaxe vérifiée sous Windows. La compilation native sur le Mac GitHub et l'installation sur iPhone restent à vérifier. Aucun IPA n'est encore fourni.
+État : [compilation native Release réussie](https://github.com/yassine812/permis-tn/actions/runs/38735271202) sur le Mac GitHub le 15 octobre 2026. Le paquet ARM64, le bundle JavaScript hors ligne, les frameworks et la somme SHA-256 ont été vérifiés. L'installation et les notifications restent à tester sur iPhone physique. [Télécharger l'IPA et l'APK](https://github.com/yassine812/permis-tn/releases/tag/v1.0.0-personal).
 
 ## 1. Créer le dépôt
 

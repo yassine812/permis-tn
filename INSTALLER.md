@@ -21,7 +21,7 @@ Cet APK personnel utilise la clé de développement fournie avec le projet. Cons
 
 ## iPhone
 
-Le dossier `ios/` contient le projet natif. Aucun fichier IPA n'est encore fourni. Depuis Windows, vous pouvez utiliser un **Mac GitHub Actions**, puis installer l'IPA avec AltStore Classic : suivez [IPHONE-GITHUB.md](IPHONE-GITHUB.md). Le workflow est prêt, mais sa compilation native et l'installation sur téléphone restent à vérifier. La méthode gratuite exige un renouvellement de signature tous les 7 jours.
+Le dossier `ios/` contient le projet natif. Le fichier `artifacts/PermisTN-unsigned.ipa` (7,4 Mio) pour iOS 15.1 ou plus récent est disponible sur la [page de téléchargement](https://github.com/yassine812/permis-tn/releases/tag/v1.0.0-personal). Depuis Windows, vous pouvez utiliser un **Mac GitHub Actions**, puis installer l'IPA avec AltStore Classic : suivez [IPHONE-GITHUB.md](IPHONE-GITHUB.md). La compilation native Release sur le Mac GitHub et le contenu du paquet ont été vérifiés ; l'installation et les notifications restent à tester sur téléphone. La méthode gratuite exige un renouvellement de signature tous les 7 jours.
 
 Avec un Mac et Xcode, installez les dépendances CocoaPods comme indiqué dans README, ouvrez `ios/PermisTN.xcworkspace`, choisissez votre équipe de signature et compilez en configuration Release. Cette configuration embarque le JavaScript pour fonctionner sans Metro.
 
