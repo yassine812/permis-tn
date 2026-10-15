@@ -18,6 +18,7 @@ export type Student = {
   stage: Stage;
   notes: string;
   archived: boolean;
+  hourlyRate?: number | null; // One candidate-specific price for all three stages.
   rates: Record<Stage, number | null>; // Preserved pre-v4 prices, for backup history only.
   amountPaid: number | null; // Legacy payment not yet allocated to a category.
   paidByStage: Record<Stage, number>;
@@ -30,6 +31,8 @@ export type HourEntry = {
   date: string;
   duration: number;
   notes: string;
+  paid?: boolean;
+  paidAmount?: number; // Millimes actually received; fixed when the tariff changes.
 };
 export const blankRates = (): Student['rates'] => ({
   code: null,
@@ -44,6 +47,7 @@ export type Lesson = {
   start: string;
   duration: number;
   paid: boolean;
+  paidAmount?: number;
   paymentReviewed?: boolean;
   status: Status;
   notes: string;
@@ -113,6 +117,9 @@ export const hours = (value: number) =>
     .toString()
     .replace('.', ',');
 export function validateStudent(student: Student) {
+  if (student.hourlyRate !== undefined && student.hourlyRate !== null) {
+    validateMoney(student.hourlyRate);
+  }
   for (const stage of stages) {
     if (
       !Number.isSafeInteger(student.paidByStage?.[stage]) ||
@@ -233,6 +240,7 @@ export function validateRates(rates: Data['settings']['rates']) {
   }
 }
 export function validateLesson(lesson: Lesson) {
+  validateEntryPayment(lesson);
   if (!isDate(lesson.date)) {
     throw new ValidationError('dateError');
   }
@@ -492,6 +500,7 @@ export function parseBackup(raw: string): Data {
         start: l.start,
         duration: l.duration,
         paid: l.paid,
+        ...(l.paidAmount !== undefined ? { paidAmount: l.paidAmount } : {}),
         ...(l.paymentReviewed !== undefined
           ? { paymentReviewed: l.paymentReviewed }
           : {}),
@@ -520,6 +529,55 @@ export function moneyInput(value: string): number {
 }
 export const amountText = (value: number | null) =>
   value === null ? '' : (value / 1000).toFixed(3);
+function validateMoney(value: number) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 999999999) {
+    throw new ValidationError('moneyError');
+  }
+}
+function validateEntryPayment(entry: { paid?: boolean; paidAmount?: number }) {
+  if (entry.paid !== undefined && typeof entry.paid !== 'boolean') {
+    throw new ValidationError('paymentError');
+  }
+  if (entry.paidAmount !== undefined) {
+    validateMoney(entry.paidAmount);
+    if (!entry.paid && entry.paidAmount !== 0) {
+      throw new ValidationError('paymentError');
+    }
+  }
+}
+export function paymentFields(
+  entry: { duration: number; paid?: boolean; paidAmount?: number },
+  paid: boolean,
+  rate: number | null | undefined,
+) {
+  if (rate === null || rate === undefined) {
+    throw new ValidationError('candidateRateRequired');
+  }
+  validateMoney(rate);
+  // Old flags were informational: existing manually entered receipts already cover them.
+  const paidAmount = !paid
+    ? 0
+    : entry.paid
+    ? entry.paidAmount ?? 0
+    : Math.round((entry.duration * rate) / 60);
+  validateMoney(paidAmount);
+  return { paid, paidAmount, paymentReviewed: true };
+}
+export function setLessonPayment(
+  data: Data,
+  lesson: Lesson,
+  paid: boolean,
+): Data {
+  const student = data.students.find(s => s.id === lesson.studentId);
+  return saveLesson(data, {
+    ...lesson,
+    ...paymentFields(
+      lesson,
+      paid,
+      student?.hourlyRate ?? data.settings.rates[lesson.type],
+    ),
+  });
+}
 export const money = (value: number | null, language: Language = 'fr') =>
   value === null
     ? '—'
@@ -539,6 +597,7 @@ export function hoursInput(value: string): number {
   return duration;
 }
 export function validateHourEntry(entry: HourEntry) {
+  validateEntryPayment(entry);
   if (
     typeof entry.id !== 'string' ||
     !entry.id ||
@@ -591,20 +650,24 @@ export function studentAccount(data: Data, student: Student) {
       data.hourEntries
         .filter(e => e.studentId === student.id && e.type === stage)
         .reduce((sum, e) => sum + e.duration, 0);
-    const rate = data.settings.rates[stage];
+    const rate = student.hourlyRate ?? data.settings.rates[stage];
     const total =
       duration === 0
         ? 0
         : rate === null
         ? null
         : Math.round((duration * rate) / 60);
-    const paid = student.paidByStage[stage];
+    const recordedPaid = [...data.hourEntries, ...data.lessons]
+      .filter(e => e.studentId === student.id && e.type === stage)
+      .reduce((sum, e) => sum + (e.paidAmount ?? 0), 0);
+    const paid = student.paidByStage[stage] + recordedPaid;
     return {
       stage,
       minutes: duration,
       rate,
       total,
       paid,
+      recordedPaid,
       due: total === null ? null : Math.max(0, total - paid),
       credit: total === null ? null : Math.max(0, paid - total),
     };

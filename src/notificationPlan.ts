@@ -73,7 +73,11 @@ export function planReminders(data: Data, now = Date.now(), limit = 50) {
         body: `${lesson.start} · ${student.name} · ${t(lesson.type)}`,
       });
     }
-    if (preferences.after && !lesson.paymentReviewed && end > now) {
+    if (
+      preferences.after &&
+      (!lesson.paymentReviewed || !lesson.paid) &&
+      end > now
+    ) {
       lessons.push({
         id: `ptn-after-${lesson.id}`,
         kind: 'after',

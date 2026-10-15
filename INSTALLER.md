@@ -18,11 +18,11 @@ Une fois installé, Permis TN fonctionne sans serveur, sans Expo et sans Metro. 
 
 Pour commencer :
 
-1. Dans Réglages, renseignez les tarifs Code, Conduite et Manœuvre une seule fois.
-2. Ajoutez un élève : il commence au Code.
-3. Dans l'accueil, choisissez un jour de la semaine puis touchez une heure disponible. Choisissez l'élève et enregistrez : la séance dure une heure.
+1. Ajoutez un élève et renseignez son tarif horaire unique en DT.
+2. Ce prix vaut pour le Code, la Conduite et la Manœuvre de cet élève ; il commence au Code.
+3. Dans l'accueil, choisissez un jour de la semaine puis touchez une heure disponible. Choisissez l'élève et enregistrez : la séance dure une heure. Choisissez ensuite « Payé » ou « Non payé » pour enregistrer.
 4. Après la séance, ouvrez-la et marquez-la effectuée pour l'inclure dans les comptes.
-5. Dans la fiche élève, les trois cartes affichent heures effectuées, montants payés et restes à payer. Sélectionnez une carte pour ajouter des heures déjà faites, renseigner le montant total reçu ou enregistrer le résultat de l'examen. Réussi fait passer automatiquement à l'étape suivante.
+5. Dans la fiche élève, les trois cartes affichent heures effectuées, montants payés et restes à payer. Sélectionnez une carte pour ajouter des heures déjà faites, consulter les montants reçus automatiquement ou saisir d’autres versements ou enregistrer le résultat de l'examen. Réussi fait passer automatiquement à l'étape suivante.
 6. Dans **Réglages → Rappels & notifications**, activez les rappels et accordez les autorisations demandées. Vous recevrez le rappel d'agenda à **06:00**, un rappel **15 minutes avant** chaque séance, puis un rappel de paiement à sa fin. Toucher une notification ouvre l'agenda ou la séance concernée. Revenez régulièrement dans l'app pour renouveler la file des prochains rappels, particulièrement sur iPhone.
 
 Avant de changer de téléphone ou de désinstaller l'app, exportez une sauvegarde JSON depuis Réglages et conservez-la ailleurs. Les téléphones ne se synchronisent pas automatiquement. Une sauvegarde de l'aperçu navigateur peut être restaurée sur le téléphone.

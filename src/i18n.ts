@@ -1,5 +1,23 @@
 import { Language } from './domain';
 const fr = {
+  candidateRate: 'Tarif horaire du candidat',
+  candidateRateHint:
+    'Un seul prix pour Code, Conduite et Manœuvre. À renseigner une seule fois pour cet élève.',
+  candidateRateRequired:
+    'Renseignez le tarif horaire de ce candidat avant de continuer.',
+  candidateRateSettings:
+    'Le prix de l’heure se règle dans la fiche de chaque candidat, pour les trois catégories.',
+  paymentPrompt: 'Cette heure est-elle payée ?',
+  paymentPromptHint:
+    'Votre choix enregistre l’heure et met à jour le bilan du candidat.',
+  savePaid: 'Payé · Enregistrer',
+  saveUnpaid: 'Non payé · Enregistrer',
+  continuePayment: 'Continuer au paiement',
+  recordedPayments: 'Paiements des heures enregistrées',
+  additionalPayments: 'Autres versements',
+  additionalPaymentsHint:
+    'Montants reçus en dehors des heures marquées payées, y compris les anciens versements. Ne ressaisissez pas les paiements des heures : ils sont déjà ajoutés automatiquement.',
+
   remindersTitle: 'Rappels & notifications',
   remindersSummary:
     '06:00 pour votre agenda, 15 minutes avant chaque séance, puis un rappel du paiement à la fin. Horaires de Tunisie.',
@@ -33,7 +51,7 @@ const fr = {
   paymentReviewed: 'Paiement vérifié',
   paymentToReview: 'À vérifier après la séance',
   paymentReviewHint:
-    'Ce statut sert au suivi de la séance. Pour les comptes, renseignez le montant total reçu dans les paiements de l’élève : aucun montant n’est ajouté automatiquement.',
+    'Payé ajoute le montant au bilan du candidat. Non payé le laisse à régler. Les anciens versements restent conservés séparément.',
   updateReceived: 'Mettre à jour le montant reçu',
   home: 'Accueil',
   myDiary: 'Mon agenda',
@@ -215,9 +233,9 @@ const fr = {
   allocateHint:
     'Répartissez cet ancien montant entre les trois catégories, puis réduisez le montant restant à répartir (0 une fois réparti). Il est inclus une seule fois dans le total reçu, mais pas dans les cartes des catégories.',
   accountIncomplete:
-    'Renseignez les tarifs de l’auto-école et répartissez les anciens paiements pour compléter le calcul.',
+    'Renseignez le tarif du candidat et répartissez les anciens paiements pour compléter le calcul.',
   repriceHint:
-    'Saisissez une seule fois le prix de chaque catégorie. Ces tarifs s’appliquent à tous les élèves. Les modifications recalculent aussi les heures déjà effectuées. Les montants payés restent inchangés.',
+    'Ce prix s’applique aux trois catégories de ce candidat. Le modifier recalcule ses heures effectuées ; les montants déjà reçus restent inchangés.',
   amountPaidHint:
     'Pour chaque catégorie, saisissez le montant total réellement reçu, pas seulement le dernier versement. Indiquez 0 si rien n’a été payé. Une avance reste dans sa catégorie.',
   manualHoursHint:
@@ -234,6 +252,22 @@ const fr = {
   plannedCount: 'Séances prévues',
 };
 const ar: Record<keyof typeof fr, string> = {
+  candidateRate: 'سوم الساعة متاع التلميذ',
+  candidateRateHint:
+    'نفس السوم للكود والسياقة والمناورة. تكتبو مرّة برك لكل تلميذ.',
+  candidateRateRequired: 'اكتب سوم الساعة متاع التلميذ قبل ما تكمّل.',
+  candidateRateSettings:
+    'سوم الساعة يتحدّد في ملفّ كل تلميذ، وهو نفسه للمراحل الثلاثة.',
+  paymentPrompt: 'الساعة هاذي خالصة؟',
+  paymentPromptHint: 'اختيارك يسجّل الساعة ويحدّث حساب التلميذ.',
+  savePaid: 'خالصة · سجّل',
+  saveUnpaid: 'موش خالصة · سجّل',
+  continuePayment: 'كمّل للخلاص',
+  recordedPayments: 'خلاص الساعات المسجّلة',
+  additionalPayments: 'دفعات أخرى',
+  additionalPaymentsHint:
+    'فلوس وصلتك خارج الساعات المعلّمة خالصة، بما فيها الدفعات القديمة. ما تعاودش تدخل خلاص الساعات، يتحسب وحدو.',
+
   remindersTitle: 'التذكيرات والإشعارات',
   remindersSummary:
     'مع الستّة صباح شوف برنامجك، قبل كل حصّة بربع ساعة، وبعد الحصّة راجع الخلاص. بتوقيت تونس.',
@@ -265,7 +299,7 @@ const ar: Record<keyof typeof fr, string> = {
   paymentReviewed: 'الخلاص تراجع',
   paymentToReview: 'راجع بعد الحصّة',
   paymentReviewHint:
-    'الحالة هاذي لمتابعة الحصّة. للحسابات، سجّل المبلغ الجملي المقبوض في خلاص التلميذ. ما نزيدوا حتى مبلغ آليّا.',
+    'خالصة تزيد المبلغ في حساب التلميذ. موش خالصة تخليه باقي للخلاص. الدفعات القديمة تبقى محفوظة وحدها.',
   updateReceived: 'حدّث المبلغ المقبوض',
   home: 'الرئيسية',
   myDiary: 'رزنامتي',
@@ -440,9 +474,10 @@ const ar: Record<keyof typeof fr, string> = {
   unallocatedPaid: 'خلاص قديم يلزم يتقسّم',
   allocateHint:
     'قسّم المبلغ القديم على المراحل الثلاثة ونقّص الباقي اللي يلزم يتقسّم (0 كي تكمّل). يتحسب مرّة واحدة في المجموع المقبوض، أما موش في بطاقات المراحل.',
-  accountIncomplete: 'عمّر أسوام المدرسة وقسّم الخلاص القديم باش يكمل الحساب.',
+  accountIncomplete:
+    'عمّر سوم الساعة متاع التلميذ وقسّم الخلاص القديم باش يكمل الحساب.',
   repriceHint:
-    'عمّر سوم كل مرحلة مرّة واحدة للتلامذة الكل. التغيير يعاود يحسب حتى الساعات اللي تعدّاو. المبالغ اللي تخلّصت ما تتبدّلش.',
+    'السوم هذا للمراحل الثلاثة متاع التلميذ. التغيير يعاود يحسب الساعات اللي تعدّاو، والمبالغ المقبوضة ما تتبدّلش.',
   amountPaidHint:
     'لكل مرحلة اكتب مجموع الفلوس اللي قبضتهم، موش كان آخر دفعة. اكتب 0 إذا ما خلّص شيء. التسبقة تبقى في نفس المرحلة.',
   manualHoursHint:

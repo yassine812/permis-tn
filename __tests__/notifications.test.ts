@@ -84,6 +84,13 @@ test('past reminders are not replayed and morning rolls to the next day', () => 
 test('cancellations, archived students and reviewed payments suppress their reminders', () => {
   const data = fixture();
   data.lessons[0].paymentReviewed = true;
+  // Choosing unpaid at booking still needs an end-of-lesson reminder.
+  expect(planReminders(data, now).reminders.map(r => r.kind)).toEqual([
+    'morning',
+    'before',
+    'after',
+  ]);
+  data.lessons[0].paid = true;
   expect(planReminders(data, now).reminders.map(r => r.kind)).toEqual([
     'morning',
     'before',

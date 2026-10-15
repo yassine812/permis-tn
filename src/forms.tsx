@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import {
   Data,
@@ -14,9 +14,13 @@ import {
   blankResults,
   amountText,
   moneyInput,
-  validateRates,
+  money,
+  hours,
+  paymentFields,
+  ValidationError,
 } from './domain';
-import { Button, Chip, colors, Field, Row, Txt, useT } from './ui';
+import { Key } from './i18n';
+import { Button, Chip, colors, Field, Locale, Row, Txt, useT } from './ui';
 
 export type Commit = (
   change: (data: Data) => Data,
@@ -26,10 +30,12 @@ export function StudentForm({
   student,
   commit,
   busy,
+  onSaved,
 }: {
   student?: Student;
   commit: Commit;
   busy: boolean;
+  onSaved?: (id: string) => void;
 }) {
   const t = useT();
   const [draft, setDraft] = useState<Student>(
@@ -46,6 +52,7 @@ export function StudentForm({
       examResults: blankResults(),
     },
   );
+  const [rate, setRate] = useState(amountText(student?.hourlyRate ?? null));
   return (
     <View style={{ gap: 20 }}>
       {!student && (
@@ -80,12 +87,32 @@ export function StudentForm({
         onChange={notes => setDraft({ ...draft, notes })}
         multiline
       />
+      <Field
+        label={`${t('candidateRate')} · DT`}
+        value={rate}
+        onChange={setRate}
+        numeric
+        ltr
+        maxLength={10}
+        placeholder="Ex. 30"
+      />
+      <Txt style={{ color: colors.muted }}>{t('candidateRateHint')}</Txt>
       <Button
         title={t('save')}
         disabled={busy}
         icon="check"
-        onPress={() => {
-          void commit(d => saveStudent(d, draft), true);
+        onPress={async () => {
+          const ok = await commit(
+            d =>
+              saveStudent(d, {
+                ...draft,
+                hourlyRate: moneyInput(rate),
+              }),
+            !onSaved,
+          );
+          if (ok) {
+            onSaved?.(draft.id);
+          }
         }}
       />
     </View>
@@ -131,6 +158,35 @@ export function LessonForm({
   const [search, setSearch] = useState('');
   const [choosing, setChoosing] = useState(!lesson && !initialStudent);
   const selected = data.students.find(s => s.id === draft.studentId);
+  const [pending, setPending] = useState(false);
+  const [rate, setRate] = useState('');
+  const [formError, setFormError] = useState('');
+  const candidateRate = () => selected?.hourlyRate ?? moneyInput(rate);
+  if (pending && selected) {
+    return (
+      <PaymentPrompt
+        name={selected.name}
+        type={draft.type}
+        duration={draft.duration}
+        rate={candidateRate()}
+        receivedAmount={draft.paid ? draft.paidAmount : undefined}
+        busy={busy}
+        back={() => setPending(false)}
+        choose={paid => {
+          void commit(d => {
+            const priced = saveStudent(d, {
+              ...selected,
+              hourlyRate: candidateRate(),
+            });
+            return saveLesson(priced, {
+              ...draft,
+              ...paymentFields(draft, paid, candidateRate()),
+            });
+          }, true);
+        }}
+      />
+    );
+  }
   return (
     <View style={{ gap: 20 }}>
       <Field
@@ -174,6 +230,7 @@ export function LessonForm({
                     title={s.name}
                     onPress={() => {
                       setDraft({ ...draft, studentId: s.id, type: s.stage });
+                      setRate('');
                       setChoosing(false);
                     }}
                   />
@@ -201,12 +258,41 @@ export function LessonForm({
         onChange={notes => setDraft({ ...draft, notes })}
         multiline
       />
+      {selected?.hourlyRate == null && (
+        <>
+          <Field
+            label={`${t('candidateRate')} · DT`}
+            value={rate}
+            onChange={setRate}
+            numeric
+            ltr
+            maxLength={10}
+          />
+          <Txt>{t('candidateRateHint')}</Txt>
+        </>
+      )}
+      {!!formError && (
+        <View accessibilityRole="alert">
+          <Txt style={{ color: colors.red }}>{formError}</Txt>
+        </View>
+      )}
       <Button
-        title={t('save')}
+        title={t('continuePayment')}
         icon="check"
         disabled={busy}
         onPress={() => {
-          void commit(d => saveLesson(d, draft), true);
+          try {
+            saveLesson(data, draft);
+            candidateRate();
+            setFormError('');
+            setPending(true);
+          } catch (e) {
+            setFormError(
+              t(
+                e instanceof ValidationError ? (e.message as Key) : 'dataError',
+              ),
+            );
+          }
         }}
       />
     </View>
@@ -307,54 +393,108 @@ export function TimePicker({
   );
 }
 export function RatesForm({
-  data,
+  student,
   commit,
   busy,
 }: {
-  data: Data;
+  student: Student;
   commit: Commit;
   busy: boolean;
 }) {
   const t = useT();
-  const [rates, setRates] = useState({
-    code: amountText(data.settings.rates.code),
-    conduite: amountText(data.settings.rates.conduite),
-    manoeuvre: amountText(data.settings.rates.manoeuvre),
-  });
+  const [rate, setRate] = useState(amountText(student.hourlyRate ?? null));
   return (
     <View style={{ gap: 18 }}>
-      <Txt style={{ fontWeight: '700' }}>{t('sharedRates')}</Txt>
+      <Txt style={{ fontWeight: '700' }}>{student.name}</Txt>
+      <Txt>{t('candidateRateHint')}</Txt>
       <Txt>{t('repriceHint')}</Txt>
-      {stages.map(stage => (
-        <Field
-          key={stage}
-          label={`${t('hourPrice')} · ${t(stage)} · DT`}
-          value={rates[stage]}
-          onChange={value => setRates({ ...rates, [stage]: value })}
-          placeholder={t('notSet')}
-          numeric
-          ltr
-          maxLength={10}
-        />
-      ))}
+      <Field
+        label={`${t('candidateRate')} · DT`}
+        value={rate}
+        onChange={setRate}
+        placeholder={t('notSet')}
+        numeric
+        ltr
+        maxLength={10}
+      />
       <Button
         title={t('save')}
         disabled={busy}
         onPress={() => {
           void commit(d => {
-            const next = {
-              code: rates.code.trim() ? moneyInput(rates.code) : null,
-              conduite: rates.conduite.trim()
-                ? moneyInput(rates.conduite)
-                : null,
-              manoeuvre: rates.manoeuvre.trim()
-                ? moneyInput(rates.manoeuvre)
-                : null,
-            };
-            validateRates(next);
-            return { ...d, settings: { ...d.settings, rates: next } };
+            return saveStudent(d, { ...student, hourlyRate: moneyInput(rate) });
           }, true);
         }}
+      />
+    </View>
+  );
+}
+export function PaymentPrompt({
+  name,
+  type,
+  duration,
+  rate,
+  receivedAmount,
+  busy,
+  back,
+  choose,
+}: {
+  name: string;
+  type: Stage;
+  duration: number;
+  rate: number;
+  receivedAmount?: number;
+  busy: boolean;
+  back: () => void;
+  choose: (paid: boolean) => void;
+}) {
+  const t = useT();
+  const language = useContext(Locale);
+  return (
+    <View style={{ gap: 22, paddingVertical: 16 }}>
+      <Txt style={{ fontSize: 24, fontWeight: '700' }}>
+        {t('paymentPrompt')}
+      </Txt>
+      <View
+        style={{
+          backgroundColor: colors.mint,
+          padding: 20,
+          borderRadius: 14,
+          gap: 10,
+        }}
+      >
+        <Txt style={{ fontWeight: '700', fontSize: 18 }}>{name}</Txt>
+        <Txt>
+          {t(type)} · {hours(duration)} {t('hoursUnit')}
+        </Txt>
+        <Txt style={{ fontSize: 28, fontWeight: '800' }}>
+          {money(Math.round((duration * rate) / 60), language)}
+        </Txt>
+      </View>
+      {receivedAmount !== undefined && (
+        <Txt>
+          {t('amountPaid')}: {money(receivedAmount, language)}
+        </Txt>
+      )}
+      <Txt style={{ color: colors.muted }}>{t('paymentPromptHint')}</Txt>
+      <Button
+        title={t('savePaid')}
+        icon="check"
+        disabled={busy}
+        onPress={() => choose(true)}
+      />
+      <Button
+        title={t('saveUnpaid')}
+        secondary
+        disabled={busy}
+        onPress={() => choose(false)}
+      />
+      <Button
+        title={t('back')}
+        secondary
+        compact
+        disabled={busy}
+        onPress={back}
       />
     </View>
   );

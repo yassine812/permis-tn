@@ -11,6 +11,7 @@ import {
   parseBackup,
   Student,
   tunisNow,
+  studentAccount,
 } from '../src/domain';
 import { Button, Chip, Field } from '../src/ui';
 import { StudentAccount } from '../src/account';
@@ -23,6 +24,7 @@ const student: Student = {
   stage: 'code',
   notes: '',
   archived: false,
+  hourlyRate: 30000,
   rates: blankRates(),
   amountPaid: 0,
   paidByStage: blankPayments(),
@@ -80,6 +82,65 @@ async function fill(label: string, value: string) {
   });
 }
 const savedData = () => parseBackup(db.setItem.mock.calls.at(-1)[1]);
+
+test('new candidate needs one price then manual hours ask paid or unpaid and update the category cards', async () => {
+  await pressAccessible('Nouvel élève');
+  await fill('Nom et prénom', 'Ines');
+  await pressButton('Enregistrer');
+  expect(db.setItem).not.toHaveBeenCalled();
+  await fill('Tarif horaire du candidat · DT', '25');
+  await pressButton('Enregistrer');
+  expect(
+    renderer.root.findByType(StudentAccount).props.student.hourlyRate,
+  ).toBe(25000);
+  const id = savedData().students.find(s => s.name === 'Ines')!.id;
+  await pressAccessible('Ajouter des heures');
+  expect(
+    renderer.root
+      .findAllByType(Field)
+      .some(n => n.props.label.includes('Tarif')),
+  ).toBe(false);
+  expect(
+    renderer.root
+      .findAllByType(Field)
+      .some(n => n.props.label.includes('Nombre d’heures')),
+  ).toBe(false);
+  await pressButton('Continuer au paiement');
+  expect(savedData().hourEntries).toHaveLength(0);
+  await pressButton('Payé · Enregistrer');
+  expect(savedData().hourEntries[0]).toMatchObject({
+    duration: 60,
+    paid: true,
+    paidAmount: 25000,
+  });
+  await pressAccessible('Ouvrir la catégorie · Conduite');
+  await pressAccessible('Ajouter des heures');
+  await pressButton('Continuer au paiement');
+  await pressButton('Non payé · Enregistrer');
+  const d = savedData();
+  expect(studentAccount(d, d.students.find(s => s.id === id)!)).toMatchObject({
+    minutes: 120,
+    total: 50000,
+    paid: 25000,
+    due: 25000,
+  });
+});
+
+test('failed storage save keeps the payment prompt open and retry does not duplicate an hour', async () => {
+  await pressAccessible('Test élève');
+  await pressAccessible('Ajouter des heures');
+  await pressButton('Continuer au paiement');
+  db.setItem.mockRejectedValueOnce(new Error('disk full'));
+  await pressButton('Payé · Enregistrer');
+  expect(
+    renderer.root
+      .findAllByType(Button)
+      .some(n => n.props.title === 'Payé · Enregistrer'),
+  ).toBe(true);
+  await pressButton('Payé · Enregistrer');
+  expect(savedData().hourEntries).toHaveLength(1);
+  expect(savedData().hourEntries[0].paidAmount).toBe(30000);
+});
 test('reminders are enabled explicitly and their preferences are saved', async () => {
   await pressAccessible('Réglages');
   await pressButton('Activer les rappels');
@@ -95,7 +156,8 @@ test('reminders are enabled explicitly and their preferences are saved', async (
 });
 test('a payment reminder opens the right lesson and review preserves existing money totals', async () => {
   await pressAccessible(`Planifier ${tunisNow().date} 10:00`);
-  await pressButton('Enregistrer');
+  await pressButton('Continuer au paiement');
+  await pressButton('Non payé · Enregistrer');
   const lessonId = savedData().lessons[0].id;
   const listener = (notifee.onForegroundEvent as jest.Mock).mock.calls.at(
     -1,
@@ -132,7 +194,8 @@ test('a free diary slot opens a one-hour booking at the selected time', async ()
       .findAllByType(Field)
       .find(n => n.props.label === 'Heure · HH:MM')!.props.value,
   ).toBe('10:00');
-  await pressButton('Enregistrer');
+  await pressButton('Continuer au paiement');
+  await pressButton('Non payé · Enregistrer');
   expect(savedData().lessons[0]).toMatchObject({
     date: day,
     start: '10:00',
@@ -187,7 +250,8 @@ test('calendar day click opens the correct date and selected hour/minute are sav
   await pressAccessible('14 h');
   await pressChip('30 min');
   await pressChip('Conduite');
-  await pressButton('Enregistrer');
+  await pressButton('Continuer au paiement');
+  await pressButton('Non payé · Enregistrer');
   expect(savedData().lessons).toHaveLength(1);
   expect(savedData().lessons[0]).toMatchObject({
     studentId: 'test',
@@ -220,9 +284,9 @@ test('student profile persists exam results and per-category payments separately
   ).toBe(true);
   await pressAccessible('Bilan des paiements');
   await pressButton('Paiements par catégorie');
-  await fill('Montant déjà payé · Code · DT', '10');
-  await fill('Montant déjà payé · Conduite · DT', '20,500');
-  await fill('Montant déjà payé · Manœuvre · DT', '0');
+  await fill('Autres versements · Code · DT', '10');
+  await fill('Autres versements · Conduite · DT', '20,500');
+  await fill('Autres versements · Manœuvre · DT', '0');
   await pressButton('Enregistrer');
   expect(savedData().students[0].paidByStage).toEqual({
     code: 10000,
@@ -238,12 +302,13 @@ test('student profile persists exam results and per-category payments separately
     manoeuvre: 35000,
   });
 });
-test('shared tariff editor saves school-wide prices and returns to the same profile', async () => {
+test('candidate tariff editor saves one candidate-specific price and returns to the same profile', async () => {
   await pressAccessible('Test élève');
-  await pressAccessible('Tarifs horaires de l’auto-école');
-  await fill('Prix de l’heure · Conduite · DT', '40');
+  await pressAccessible('Tarif horaire du candidat');
+  await fill('Tarif horaire du candidat · DT', '40');
   await pressButton('Enregistrer');
-  expect(savedData().settings.rates.conduite).toBe(40000);
+  expect(savedData().students[0].hourlyRate).toBe(40000);
+  expect(savedData().settings.rates.conduite).toBe(30000);
   expect(renderer.root.findByType(StudentAccount).props.student.id).toBe(
     'test',
   );

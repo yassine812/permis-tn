@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import {
   amountText,
+  Data,
   HourEntry,
   hours,
   hoursInput,
   moneyInput,
+  paymentFields,
+  studentAccount,
+  money,
+  ValidationError,
   saveHourEntry,
   saveStudent,
   Stage,
@@ -14,16 +19,19 @@ import {
   tunisNow,
   uid,
 } from './domain';
-import { Commit } from './forms';
-import { Button, Chip, Field, Row, Txt, useT } from './ui';
+import { Commit, PaymentPrompt } from './forms';
+import { Key } from './i18n';
+import { Button, Chip, colors, Field, Row, Txt, useT } from './ui';
 import { styles as s } from './styles';
 export { StudentAccount } from './profile';
 export function BillingForm({
+  data,
   student,
   stage,
   commit,
   busy,
 }: {
+  data: Data;
   student: Student;
   stage?: Stage;
   commit: Commit;
@@ -41,11 +49,19 @@ export function BillingForm({
   return (
     <View style={{ gap: 20 }}>
       <Txt style={s.sectionTitle}>{student.name}</Txt>
-      <Txt style={s.muted}>{t('amountPaidHint')}</Txt>
+      <Txt style={s.muted}>{t('additionalPaymentsHint')}</Txt>
+      <Txt>
+        {t('recordedPayments')}:{' '}
+        {money(
+          studentAccount(data, student)
+            .byStage.filter(row => !stage || row.stage === stage)
+            .reduce((sum, row) => sum + row.recordedPaid, 0),
+        )}
+      </Txt>
       {(stage ? [stage] : stages).map(stage => (
         <Field
           key={stage}
-          label={`${t('amountPaid')} · ${t(stage)} · DT`}
+          label={`${t('additionalPayments')} · ${t(stage)} · DT`}
           value={paid[stage]}
           onChange={value => setPaid({ ...paid, [stage]: value })}
           numeric
@@ -90,12 +106,14 @@ export function BillingForm({
   );
 }
 export function HoursForm({
+  data,
   student,
   stage,
   entry,
   commit,
   busy,
 }: {
+  data: Data;
   student: Student;
   stage?: Stage;
   entry?: HourEntry;
@@ -108,6 +126,35 @@ export function HoursForm({
   const [date, setDate] = useState(entry?.date || tunisNow().date);
   const [notes, setNotes] = useState(entry?.notes || '');
   const [id] = useState(entry?.id || uid());
+  const [pending, setPending] = useState<HourEntry | null>(null);
+  const [rate, setRate] = useState('');
+  const [formError, setFormError] = useState('');
+  const candidateRate = () => student.hourlyRate ?? moneyInput(rate);
+  if (pending) {
+    return (
+      <PaymentPrompt
+        name={student.name}
+        type={pending.type}
+        duration={pending.duration}
+        rate={candidateRate()}
+        receivedAmount={pending.paid ? pending.paidAmount : undefined}
+        busy={busy}
+        back={() => setPending(null)}
+        choose={paid => {
+          void commit(d => {
+            const priced = saveStudent(d, {
+              ...student,
+              hourlyRate: candidateRate(),
+            });
+            return saveHourEntry(priced, {
+              ...pending,
+              ...paymentFields(pending, paid, candidateRate()),
+            });
+          }, true);
+        }}
+      />
+    );
+  }
   return (
     <View style={{ gap: 20 }}>
       <Txt style={s.sectionTitle}>{student.name}</Txt>
@@ -122,14 +169,18 @@ export function HoursForm({
           />
         ))}
       </Row>
-      <Field
-        label={t('hoursToAdd')}
-        value={duration}
-        onChange={setDuration}
-        numeric
-        ltr
-        maxLength={7}
-      />
+      {entry ? (
+        <Field
+          label={t('hoursToAdd')}
+          value={duration}
+          onChange={setDuration}
+          numeric
+          ltr
+          maxLength={7}
+        />
+      ) : (
+        <Txt style={s.sectionTitle}>1 {t('hoursUnit')}</Txt>
+      )}
       <Field
         label={t('date')}
         value={date}
@@ -138,22 +189,49 @@ export function HoursForm({
         maxLength={10}
       />
       <Field label={t('notes')} value={notes} onChange={setNotes} multiline />
+      {student.hourlyRate == null && (
+        <>
+          <Field
+            label={`${t('candidateRate')} · DT`}
+            value={rate}
+            onChange={setRate}
+            numeric
+            ltr
+            maxLength={10}
+          />
+          <Txt style={s.muted}>{t('candidateRateHint')}</Txt>
+        </>
+      )}
+      {!!formError && (
+        <View accessibilityRole="alert">
+          <Txt style={{ color: colors.red }}>{formError}</Txt>
+        </View>
+      )}
       <Button
-        title={t('save')}
+        title={t('continuePayment')}
         disabled={busy}
         onPress={() => {
-          void commit(
-            d =>
-              saveHourEntry(d, {
-                id,
-                studentId: student.id,
-                type,
-                date,
-                duration: hoursInput(duration),
-                notes,
-              }),
-            true,
-          );
+          try {
+            const next = {
+              ...entry,
+              id,
+              studentId: student.id,
+              type,
+              date,
+              duration: hoursInput(duration),
+              notes,
+            };
+            saveHourEntry(data, next);
+            candidateRate();
+            setFormError('');
+            setPending(next);
+          } catch (e) {
+            setFormError(
+              t(
+                e instanceof ValidationError ? (e.message as Key) : 'dataError',
+              ),
+            );
+          }
         }}
       />
     </View>

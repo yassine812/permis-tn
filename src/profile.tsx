@@ -160,6 +160,17 @@ export function StudentAccount({
           ))}
         </Row>
       </View>
+      <Button
+        secondary
+        title={`${t('candidateRate')} · ${money(
+          student.hourlyRate ?? null,
+          language,
+        )} / h`}
+        onPress={editRates}
+      />
+      {student.hourlyRate == null && (
+        <Txt style={s.muted}>{t('candidateRateHint')}</Txt>
+      )}
       <Row style={{ justifyContent: 'space-between' }}>
         <Txt style={s.sectionTitle}>{t('yourCategories')}</Txt>
         <Txt style={s.smallMuted}>
@@ -283,7 +294,7 @@ export function StudentAccount({
           <Txt style={s.muted}>{t('hourPrice')}</Txt>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('sharedRates')}
+            accessibilityLabel={t('candidateRate')}
             onPress={editRates}
           >
             <Txt

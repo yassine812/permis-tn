@@ -22,6 +22,7 @@ import {
   monthDays,
   parseBackup,
   saveLesson,
+  setLessonPayment,
   setExamResult,
   shiftMonth,
   Stage,
@@ -441,7 +442,13 @@ export default function Application() {
                 <Button
                   key={e.id}
                   secondary
-                  title={`${t(e.type)} · ${fmt(e.duration)} · ${e.date}`}
+                  title={`${t(e.type)} · ${fmt(e.duration)} · ${e.date} · ${t(
+                    e.paid === undefined
+                      ? 'paymentToReview'
+                      : e.paid
+                      ? 'paid'
+                      : 'notPaid',
+                  )}`}
                   onPress={() =>
                     open({ kind: 'hours', studentId: st.id, id: e.id })
                   }
@@ -500,44 +507,38 @@ export default function Application() {
             {l.duration} {t('minutesUnit')}
           </Txt>
         </Row>
-        {l.status !== 'cancelled' && (
-          <View style={[s.card, { padding: 16, gap: 12 }]}>
-            <Txt style={s.sectionTitle}>{t('lessonPayment')}</Txt>
-            <Txt style={s.muted}>
-              {t(l.paymentReviewed ? 'paymentReviewed' : 'paymentToReview')}
-            </Txt>
-            <Row>
-              <Chip
-                title={t('paid')}
-                active={!!l.paymentReviewed && l.paid}
-                disabled={busy}
-                onPress={() => {
-                  void commit(d =>
-                    saveLesson(d, { ...l, paid: true, paymentReviewed: true }),
-                  );
-                }}
-              />
-              <Chip
-                title={t('lessonUnpaid')}
-                active={!!l.paymentReviewed && !l.paid}
-                disabled={busy}
-                onPress={() => {
-                  void commit(d =>
-                    saveLesson(d, { ...l, paid: false, paymentReviewed: true }),
-                  );
-                }}
-              />
-            </Row>
-            <Txt style={s.smallMuted}>{t('paymentReviewHint')}</Txt>
-            <Button
-              secondary
-              title={t('updateReceived')}
-              onPress={() =>
-                open({ kind: 'billing', id: owner.id, stage: l.type })
-              }
+        <View style={[s.card, { padding: 16, gap: 12 }]}>
+          <Txt style={s.sectionTitle}>{t('lessonPayment')}</Txt>
+          <Txt style={s.muted}>
+            {t(l.paymentReviewed ? 'paymentReviewed' : 'paymentToReview')}
+          </Txt>
+          <Row>
+            <Chip
+              title={t('paid')}
+              active={!!l.paymentReviewed && l.paid}
+              disabled={busy}
+              onPress={() => {
+                void commit(d => setLessonPayment(d, l, true));
+              }}
             />
-          </View>
-        )}
+            <Chip
+              title={t('lessonUnpaid')}
+              active={!!l.paymentReviewed && !l.paid}
+              disabled={busy}
+              onPress={() => {
+                void commit(d => setLessonPayment(d, l, false));
+              }}
+            />
+          </Row>
+          <Txt style={s.smallMuted}>{t('paymentReviewHint')}</Txt>
+          <Button
+            secondary
+            title={t('updateReceived')}
+            onPress={() =>
+              open({ kind: 'billing', id: owner.id, stage: l.type })
+            }
+          />
+        </View>
         <Row style={{ justifyContent: 'space-between' }}>
           <Txt style={s.muted}>{t('status')}</Txt>
           <Txt style={{ fontWeight: '700' }}>{t(l.status)}</Txt>
@@ -583,7 +584,7 @@ export default function Application() {
   }
   const sheetTitle =
     sheet?.kind === 'rates'
-      ? t('sharedRates')
+      ? t('candidateRate')
       : sheet?.kind === 'billing'
       ? t('editBilling')
       : sheet?.kind === 'hours'
@@ -912,11 +913,7 @@ export default function Application() {
                     busy={busy}
                   />
                 </View>
-                <Button
-                  title={t('sharedRates')}
-                  secondary
-                  onPress={() => open({ kind: 'rates' })}
-                />
+                <Txt style={s.muted}>{t('candidateRateSettings')}</Txt>
                 <View style={[s.card, { padding: 20, gap: 16 }]}>
                   <Icon name="shield" color={colors.green} size={28} />
                   <Txt style={s.sectionTitle}>{t('backup')}</Txt>
@@ -1027,25 +1024,29 @@ export default function Application() {
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={s.content}
               >
-                {sheet?.kind === 'rates' && (
-                  <RatesForm
-                    data={data}
-                    busy={busy}
-                    commit={async change => {
-                      const ok = await commit(change);
-                      if (ok) {
-                        setSheet(
-                          sheet.studentId
-                            ? { kind: 'student', id: sheet.studentId }
-                            : null,
-                        );
+                {sheet?.kind === 'rates' &&
+                  data.students.find(st => st.id === sheet.studentId) && (
+                    <RatesForm
+                      student={
+                        data.students.find(st => st.id === sheet.studentId)!
                       }
-                      return ok;
-                    }}
-                  />
-                )}
+                      busy={busy}
+                      commit={async change => {
+                        const ok = await commit(change);
+                        if (ok) {
+                          setSheet(
+                            sheet.studentId
+                              ? { kind: 'student', id: sheet.studentId }
+                              : null,
+                          );
+                        }
+                        return ok;
+                      }}
+                    />
+                  )}
                 {sheet?.kind === 'billing' && student && (
                   <BillingForm
+                    data={data}
                     student={student}
                     stage={sheet.stage}
                     busy={busy}
@@ -1065,6 +1066,7 @@ export default function Application() {
                 {sheet?.kind === 'hours' &&
                   data.students.find(st => st.id === sheet.studentId) && (
                     <HoursForm
+                      data={data}
                       student={
                         data.students.find(st => st.id === sheet.studentId)!
                       }
@@ -1088,6 +1090,7 @@ export default function Application() {
                   <StudentForm
                     key={sheet.id || 'new'}
                     student={student}
+                    onSaved={id => setSheet({ kind: 'student', id })}
                     commit={commit}
                     busy={busy}
                   />

@@ -13,6 +13,8 @@ import {
   saveStudent,
   Student,
   studentAccount,
+  paymentFields,
+  setLessonPayment,
 } from '../src/domain';
 const student: Student = {
   id: 's',
@@ -28,6 +30,138 @@ const student: Student = {
 };
 const now = new Date('2026-10-15T12:00:00Z');
 const base = () => saveStudent(emptyData(), student);
+
+test('candidate rate is shared by all stages and payment choices survive backups without double counting', () => {
+  let d = saveStudent(base(), { ...student, hourlyRate: 30000 });
+  d = saveStudent(d, { ...student, id: 'other', hourlyRate: 40000 });
+  for (const type of ['code', 'conduite', 'manoeuvre'] as const) {
+    const entry = {
+      id: type,
+      studentId: 's',
+      type,
+      date: '2026-10-14',
+      duration: 60,
+      notes: '',
+    };
+    d = saveHourEntry(
+      d,
+      { ...entry, ...paymentFields(entry, type !== 'manoeuvre', 30000) },
+      now,
+    );
+  }
+  expect(studentAccount(d, d.students[0]).byStage).toMatchObject([
+    { rate: 30000, total: 30000, paid: 30000, due: 0 },
+    { rate: 30000, total: 30000, paid: 30000, due: 0 },
+    { rate: 30000, total: 30000, paid: 0, due: 30000 },
+  ]);
+  const existing = d.hourEntries[0];
+  d = saveHourEntry(
+    d,
+    { ...existing, ...paymentFields(existing, true, 30000) },
+    now,
+  );
+  expect(d.hourEntries).toHaveLength(3);
+  expect(studentAccount(d, d.students[0]).paid).toBe(60000);
+  d = saveStudent(d, { ...d.students[0], hourlyRate: 35000 });
+  expect(studentAccount(d, d.students[0])).toMatchObject({
+    total: 105000,
+    paid: 60000,
+    due: 45000,
+  });
+  expect(d.students[1].hourlyRate).toBe(40000);
+  d = saveHourEntry(
+    d,
+    { ...existing, ...paymentFields(existing, false, 35000) },
+    now,
+  );
+  expect(studentAccount(d, d.students[0]).paid).toBe(30000);
+  expect(parseBackup(JSON.stringify(d))).toEqual(d);
+});
+
+test('calendar payment updates money once and completed hours separately, preserving legacy receipts', () => {
+  let d = saveStudent(base(), {
+    ...student,
+    hourlyRate: 30000,
+    paidByStage: { ...blankPayments(), code: 10000 },
+  });
+  d = saveLesson(
+    d,
+    {
+      id: 'p',
+      studentId: 's',
+      type: 'code',
+      date: '2026-10-14',
+      start: '08:00',
+      duration: 60,
+      paid: false,
+      status: 'planned',
+      notes: '',
+    },
+    now,
+  );
+  d = setLessonPayment(d, d.lessons[0], true);
+  d = setLessonPayment(d, d.lessons[0], true);
+  expect(studentAccount(d, d.students[0])).toMatchObject({
+    minutes: 0,
+    paid: 40000,
+    credit: 40000,
+  });
+  d = saveLesson(d, { ...d.lessons[0], status: 'done' }, now);
+  expect(studentAccount(d, d.students[0])).toMatchObject({
+    minutes: 60,
+    total: 30000,
+    paid: 40000,
+  });
+  expect(parseBackup(JSON.stringify(d))).toEqual(d);
+  d = setLessonPayment(d, d.lessons[0], false);
+  expect(studentAccount(d, d.students[0]).paid).toBe(10000);
+  d = setLessonPayment(d, d.lessons[0], true);
+  d = saveLesson(d, { ...d.lessons[0], status: 'cancelled' }, now);
+  expect(studentAccount(d, d.students[0])).toMatchObject({
+    minutes: 0,
+    paid: 40000,
+    credit: 40000,
+  });
+  d = setLessonPayment(d, d.lessons[0], false);
+  // Pre-existing informational flags must not invent a second receipt.
+  const legacy = { ...d.lessons[0], paid: true, paidAmount: undefined };
+  d = setLessonPayment(d, legacy, true);
+  expect(studentAccount(d, d.students[0]).paid).toBe(10000);
+});
+
+test('invalid candidate prices and receipt amounts are rejected before restoring a backup', () => {
+  for (const rate of [-1, 1.5, '30', Infinity]) {
+    const raw = JSON.stringify({
+      ...base(),
+      students: [{ ...student, hourlyRate: rate }],
+    });
+    if (rate !== Infinity) {
+      expect(() => parseBackup(raw)).toThrow('backupError');
+    }
+    expect(() =>
+      paymentFields({ duration: 60 }, true, rate as number),
+    ).toThrow();
+  }
+  const entry = {
+    id: 'h',
+    studentId: 's',
+    type: 'code',
+    date: '2026-10-14',
+    duration: 60,
+    notes: '',
+  };
+  for (const payment of [
+    { paid: false, paidAmount: 1000 },
+    { paid: true, paidAmount: -1000 },
+    { paid: 'yes', paidAmount: 0 },
+  ]) {
+    expect(() =>
+      parseBackup(
+        JSON.stringify({ ...base(), hourEntries: [{ ...entry, ...payment }] }),
+      ),
+    ).toThrow('backupError');
+  }
+});
 test('one shared tariff applies to existing and new students with category-specific payments', () => {
   let d = base();
   d.settings.rates = { code: 10000, conduite: 30000, manoeuvre: 40000 };
