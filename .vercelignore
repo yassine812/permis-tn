@@ -1,0 +1,14 @@
+node_modules
+artifacts
+preview-dist
+android
+ios
+.git
+.github
+.bundle
+vendor
+coverage
+test-results
+playwright-report
+*.log
+.env*

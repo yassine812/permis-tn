@@ -2,7 +2,7 @@
 
 ## Installation directe depuis Safari ou Chrome — gratuite
 
-1. Ouvrir https://yassine812.github.io/permis-tn/ dans Safari sur iPhone.
+1. Ouvrir https://permis-tn.vercel.app/ dans Safari sur iPhone.
 2. Toucher **Partager → Sur l’écran d’accueil → Ajouter**. Activer « Ouvrir comme app web » si proposé.
 3. Ouvrir l’icône Permis TN et attendre **Prêt à fonctionner hors connexion** avant de couper Internet.
 

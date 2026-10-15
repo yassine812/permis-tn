@@ -4,13 +4,15 @@ Application mobile pour les moniteurs d’auto-école en Tunisie. React Native n
 
 ## Installer sans câble et sans abonnement
 
-Ouvrir **https://yassine812.github.io/permis-tn/** sur le téléphone.
+Ouvrir **https://permis-tn.vercel.app/** sur le téléphone.
 - iPhone : Safari → Partager → Sur l’écran d’accueil → Ajouter (activer « Ouvrir comme app web » si proposé).
 - Android : Chrome → menu → Installer l’application.
 
 Attendre **« Prêt à fonctionner hors connexion »** avant de couper Internet. Les élèves, séances, tarifs, examens et paiements fonctionnent ensuite hors ligne. Cette version web ne nécessite pas de renouvellement de signature tous les 7 jours. Les rappels à 06:00 et avant/après les séances ne sont pas disponibles quand elle est fermée.
 
 Les données restent dans IndexedDB sur chaque appareil, sans serveur ni synchronisation. Exporter régulièrement une sauvegarde JSON dans Réglages : effacer les données du navigateur peut les supprimer. Installer d’abord l’app puis y saisir ses données ; si Safari et l’app installée affichent des données différentes, utiliser l’export/import JSON pour les transférer. Les mises à jour se téléchargent en ligne et prennent effet après fermeture de toutes les fenêtres Permis TN ; elles ne rechargent pas un formulaire ouvert.
+
+Les données de l’ancienne adresse GitHub Pages ne se transfèrent pas automatiquement vers Vercel. Exporter une sauvegarde depuis l’ancienne adresse, puis la restaurer sur la nouvelle.
 
 ## Fonctionnement
 
@@ -106,7 +108,7 @@ Ouvrir `ios/PermisTN.xcworkspace`, choisir son équipe de signature pour un iPho
 npm run preview
 ```
 
-Ouvrir http://127.0.0.1:5189/ pour le développement. Pour vérifier la PWA, exécuter `npm run web:build`, puis `npm run web:serve` et ouvrir http://127.0.0.1:5190/. Le build produit `preview-dist/` avec manifeste, icônes et service worker. `.github/workflows/web.yml` publie ce dossier sur GitHub Pages. Aucun fichier d’élève n’est publié. Le service worker précharge uniquement les fichiers statiques du build et conserve les autres caches du domaine.
+Ouvrir http://127.0.0.1:5189/ pour le développement. Pour vérifier la PWA, exécuter `npm run web:build`, puis `npm run web:serve` et ouvrir http://127.0.0.1:5190/. Le build produit `preview-dist/` avec manifeste, icônes et service worker. `vercel.json` configure le build et les tests hors ligne sur Vercel, dans le projet `permis-tn` du compte `yassines-projects-9fc526f9`, relié au dépôt GitHub. Le workflow `.github/workflows/web.yml` conserve aussi la publication GitHub Pages existante. Aucun fichier d’élève n’est publié. Le service worker précharge uniquement les fichiers statiques du build et conserve les autres caches du domaine.
 
 ## Vérification
 
