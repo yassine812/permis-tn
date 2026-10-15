@@ -2,6 +2,16 @@
 
 Application mobile pour les moniteurs d’auto-école en Tunisie. React Native natif, iOS et Android, **sans Expo**.
 
+## Installer sans câble et sans abonnement
+
+Ouvrir **https://yassine812.github.io/permis-tn/** sur le téléphone.
+- iPhone : Safari → Partager → Sur l’écran d’accueil → Ajouter (activer « Ouvrir comme app web » si proposé).
+- Android : Chrome → menu → Installer l’application.
+
+Attendre **« Prêt à fonctionner hors connexion »** avant de couper Internet. Les élèves, séances, tarifs, examens et paiements fonctionnent ensuite hors ligne. Cette version web ne nécessite pas de renouvellement de signature tous les 7 jours. Les rappels à 06:00 et avant/après les séances ne sont pas disponibles quand elle est fermée.
+
+Les données restent dans IndexedDB sur chaque appareil, sans serveur ni synchronisation. Exporter régulièrement une sauvegarde JSON dans Réglages : effacer les données du navigateur peut les supprimer. Installer d’abord l’app puis y saisir ses données ; si Safari et l’app installée affichent des données différentes, utiliser l’export/import JSON pour les transférer. Les mises à jour se téléchargent en ligne et prennent effet après fermeture de toutes les fenêtres Permis TN ; elles ne rechargent pas un formulaire ouvert.
+
 ## Fonctionnement
 
 - L'accueil est un agenda de travail : semaine sélectionnable, séances de la journée et créneaux libres de 08:00 à 18:00. Toucher un créneau préremplit le jour et l'heure d'une séance d'une heure. Le formulaire permet aussi de choisir d'autres horaires. Les créneaux qui chevauchent une séance existante ne sont pas proposés.
@@ -96,15 +106,16 @@ Ouvrir `ios/PermisTN.xcworkspace`, choisir son équipe de signature pour un iPho
 npm run preview
 ```
 
-Ouvrir http://127.0.0.1:5189/ . C’est un aperçu des mêmes composants React Native via React Native Web, réservé à la vérification de l’interface. Le produit mobile reste un projet Android/iOS natif. Le serveur d’aperçu doit rester lancé ; ce n’est pas une PWA installable hors ligne.
+Ouvrir http://127.0.0.1:5189/ pour le développement. Pour vérifier la PWA, exécuter `npm run web:build`, puis `npm run web:serve` et ouvrir http://127.0.0.1:5190/. Le build produit `preview-dist/` avec manifeste, icônes et service worker. `.github/workflows/web.yml` publie ce dossier sur GitHub Pages. Aucun fichier d’élève n’est publié. Le service worker précharge uniquement les fichiers statiques du build et conserve les autres caches du domaine.
 
 ## Vérification
 
 ```sh
 npm run typecheck
-npm test -- --runInBand
+npm test -- --runInBand --testTimeout=15000
 npm run lint -- --quiet
-npm run preview:build
+npm run web:build
+node --test web/offline.test.mjs
 npm run bundle:android -- --max-workers 2
 npm run bundle:ios -- --max-workers 2
 ```
@@ -130,3 +141,5 @@ La vérification Android AGP 9.2 signale à tort `MainActivity must extend andro
 - `src/i18n.ts` : français et tunisien.
 - `android/`, `ios/` : vrais projets natifs et icônes.
 - `__tests__/` : tests métier, persistance et rendu initial.
+
+Vérification PWA : cache hors ligne testé (5 tests), rechargement réel dans le navigateur après arrêt du serveur, persistance d’un élève de test et téléchargement de sa sauvegarde JSON. Installation depuis Safari sur iPhone physique encore à vérifier.

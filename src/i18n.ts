@@ -4,7 +4,7 @@ const fr = {
   remindersSummary:
     '06:00 pour votre agenda, 15 minutes avant chaque séance, puis un rappel du paiement à la fin. Horaires de Tunisie.',
   remindersNative:
-    'Les notifications fonctionnent dans l’application installée sur Android ou iPhone. Cet aperçu navigateur ne les envoie pas.',
+    'La version installée depuis Safari ou Chrome ne peut pas envoyer les rappels hors ligne quand elle est fermée. Consultez votre agenda dans l’app. Les rappels automatiques sont disponibles dans la version native Android ou iPhone.',
   enableReminders: 'Activer les rappels',
   disableReminders: 'Désactiver les rappels',
   morningOption: 'Chaque matin à 06:00',
@@ -238,7 +238,7 @@ const ar: Record<keyof typeof fr, string> = {
   remindersSummary:
     'مع الستّة صباح شوف برنامجك، قبل كل حصّة بربع ساعة، وبعد الحصّة راجع الخلاص. بتوقيت تونس.',
   remindersNative:
-    'الإشعارات تخدم في التطبيق المثبّت على أندرويد ولا آيفون. المعاينة في المتصفّح ما تبعثش إشعارات.',
+    'النسخة المثبّتة من Safari ولا Chrome ما تبعثش تذكيرات بلا إنترنت كي تكون مسكّرة. شوف برنامجك في التطبيق. التذكيرات الآلية موجودة في النسخة الأصلية متاع أندرويد ولا آيفون.',
   enableReminders: 'فعّل التذكيرات',
   disableReminders: 'وقّف التذكيرات',
   morningOption: 'كل صباح مع 06:00',

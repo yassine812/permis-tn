@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: './',
   plugins: [react()],
   resolve: {
     alias: [
@@ -42,9 +43,8 @@ export default defineConfig({
     ],
   },
   define: {
-    __DEV__: 'true',
-    'process.env.NODE_ENV': JSON.stringify('development'),
+    __DEV__: JSON.stringify(command === 'serve'),
   },
   server: { host: '127.0.0.1', port: 5189, strictPort: true },
   build: { outDir: 'preview-dist' },
-});
+}));

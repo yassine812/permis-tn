@@ -1,6 +1,16 @@
 # Installer Permis TN
 
-## Android
+## Installation directe depuis Safari ou Chrome — gratuite
+
+1. Ouvrir https://yassine812.github.io/permis-tn/ dans Safari sur iPhone.
+2. Toucher **Partager → Sur l’écran d’accueil → Ajouter**. Activer « Ouvrir comme app web » si proposé.
+3. Ouvrir l’icône Permis TN et attendre **Prêt à fonctionner hors connexion** avant de couper Internet.
+
+Sur Android, ouvrir le même lien dans Chrome puis **menu → Installer l’application**. Aucun câble, compte Apple Developer ou renouvellement hebdomadaire n’est nécessaire.
+
+Les élèves, heures, examens, calendrier et paiements restent disponibles hors ligne. Cette version n’envoie pas les rappels lorsque l’app est fermée. Sauvegarder régulièrement via **Réglages → Exporter une sauvegarde → Télécharger la sauvegarde .json**. Pour restaurer, choisir le fichier dans **Restaurer une sauvegarde**, puis confirmer l’import. Les données sont locales à l’appareil et ne sont pas publiées sur GitHub.
+
+## Android natif
 
 Le fichier `artifacts/permis-tn-android-arm64.apk` (21,9 Mio) est destiné aux téléphones Android 7 ou plus récents, 64 bits ARM. Sa compilation et sa signature ont été vérifiées. Copiez-le sur le téléphone par câble USB ou un autre moyen de votre choix, ouvrez-le et autorisez l'installation depuis l'application utilisée si Android le demande.
 

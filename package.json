@@ -10,9 +10,11 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "preview": "vite",
-    "preview:build": "vite build",
+    "preview:build": "node scripts/build-web.mjs",
     "bundle:android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output artifacts/index.android.bundle --assets-dest artifacts/android",
-    "bundle:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output artifacts/main.jsbundle --assets-dest artifacts/ios"
+    "bundle:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output artifacts/main.jsbundle --assets-dest artifacts/ios",
+    "web:build": "node scripts/build-web.mjs",
+    "web:serve": "vite preview --host 127.0.0.1 --port 5190"
   },
   "dependencies": {
     "@notifee/react-native": "^9.1.8",

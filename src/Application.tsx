@@ -51,6 +51,7 @@ import { styles as s } from './styles';
 import { Planner } from './planner';
 import { useReminders } from './useReminders';
 import { ReminderSettings } from './ReminderSettings';
+import { WebInstall, BackupDownload, BackupFilePicker } from './WebFeatures';
 import { StudentAccount, BillingForm, HoursForm } from './account';
 
 type Tab = 'home' | 'students' | 'calendar' | 'settings';
@@ -661,6 +662,7 @@ export default function Application() {
             contentContainerStyle={s.content}
             keyboardShouldPersistTaps="handled"
           >
+            {tab === 'home' && <WebInstall compact />}
             {tab === 'home' && (
               <Planner
                 data={data}
@@ -899,6 +901,7 @@ export default function Application() {
                 <View style={[s.card, { padding: 20 }]}>
                   <SettingsForm data={data} commit={commit} busy={busy} />
                 </View>
+                <WebInstall />
                 <View style={[s.card, { padding: 20 }]}>
                   <ReminderSettings
                     data={data}
@@ -1119,6 +1122,7 @@ export default function Application() {
                 {sheet?.kind === 'export' && (
                   <View style={{ gap: 20 }}>
                     <Txt>{t('exportHint')}</Txt>
+                    <BackupDownload data={data} />
                     <Field
                       label={t('backupText')}
                       value={JSON.stringify(data, null, 2)}
@@ -1142,6 +1146,10 @@ export default function Application() {
                 {sheet?.kind === 'import' && (
                   <View style={{ gap: 20 }}>
                     <Txt>{t('restoreHint')}</Txt>
+                    <BackupFilePicker
+                      onRead={setBackupInput}
+                      onError={() => setError(t('backupError'))}
+                    />
                     <Field
                       label={t('backupText')}
                       value={backupInput}

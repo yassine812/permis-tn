@@ -1,0 +1,123 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, access } from 'node:fs/promises';
+import vm from 'node:vm';
+
+// Execute the built worker against cache and network doubles, including failures.
+const source = await readFile('preview-dist/sw.js', 'utf8');
+const scope = 'https://example.test/permis-tn/';
+const url = path => new URL(path, scope).href;
+function runtime({ failInstall = false } = {}) {
+  const listeners = {};
+  const records = new Map();
+  const cacheNames = new Map([
+    ['unrelated-app', new Map()],
+    [`permis-tn:${scope}:old`, new Map()],
+  ]);
+  let network = 0;
+  let precached = [];
+  const context = {
+    URL,
+    self: {
+      registration: { scope },
+      clients: { claim: async () => {} },
+      addEventListener: (name, listener) => {
+        listeners[name] = listener;
+      },
+    },
+    caches: {
+      open: async name => {
+        cacheNames.set(name, records);
+        return {
+          addAll: async files => {
+            if (failInstall) {
+              throw Error('offline during installation');
+            }
+            precached = files;
+            for (const file of files) {
+              records.set(file, { url: file, fromCache: true });
+            }
+          },
+          // Simulate Vary: Origin differing between precache and module fetches.
+          match: async (request, options) =>
+            options?.ignoreVary
+              ? records.get(typeof request === 'string' ? request : request.url)
+              : undefined,
+        };
+      },
+      keys: async () => [...cacheNames.keys()],
+      delete: async name => cacheNames.delete(name),
+    },
+    fetch: async () => {
+      network++;
+      throw Error('network offline');
+    },
+  };
+  vm.runInNewContext(source, context);
+  const lifecycle = name =>
+    new Promise((resolve, reject) =>
+      listeners[name]({ waitUntil: promise => promise.then(resolve, reject) }),
+    );
+  const request = (path, mode = 'cors', method = 'GET') => {
+    let response;
+    listeners.fetch({
+      request: { url: url(path), mode, method },
+      respondWith: value => {
+        response = value;
+      },
+    });
+    return response;
+  };
+  return {
+    lifecycle,
+    request,
+    cacheNames,
+    get precached() {
+      return precached;
+    },
+    get network() {
+      return network;
+    },
+  };
+}
+test('all install files exist and work beneath the GitHub repository path', async () => {
+  const worker = runtime();
+  await worker.lifecycle('install');
+  assert.ok(worker.precached.includes(url('index.html')));
+  assert.ok(worker.precached.includes(url('manifest.webmanifest')));
+  for (const file of worker.precached) {
+    assert.ok(file.startsWith(scope));
+    await access('preview-dist/' + file.slice(scope.length));
+  }
+});
+test('cold navigation and every cached asset load without a network', async () => {
+  const worker = runtime();
+  await worker.lifecycle('install');
+  assert.equal(
+    (await worker.request('?installed=1', 'navigate')).url,
+    url('index.html'),
+  );
+  for (const file of worker.precached) {
+    assert.equal((await worker.request(file)).fromCache, true);
+  }
+  assert.equal(worker.network, 0);
+});
+test('updates remove only this app cache and leave unrelated caches alone', async () => {
+  const worker = runtime();
+  await worker.lifecycle('install');
+  await worker.lifecycle('activate');
+  assert.ok(worker.cacheNames.has('unrelated-app'));
+  assert.ok(!worker.cacheNames.has(`permis-tn:${scope}:old`));
+  assert.equal(worker.cacheNames.size, 2);
+});
+test('an incomplete offline installation fails instead of claiming readiness', async () => {
+  await assert.rejects(
+    runtime({ failInstall: true }).lifecycle('install'),
+    /offline/,
+  );
+});
+test('student writes and other origins are never intercepted', async () => {
+  const worker = runtime();
+  assert.equal(worker.request('data', 'cors', 'POST'), undefined);
+  assert.equal(worker.request('https://other.example/'), undefined);
+});

@@ -74,11 +74,11 @@ export function ReminderSettings({
       <Txt style={{ fontSize: 19, fontWeight: '700' }}>
         {t('remindersTitle')}
       </Txt>
-      <Txt style={{ color: colors.muted }}>{t('remindersSummary')}</Txt>
       {Platform.OS === 'web' ? (
         <Txt>{t('remindersNative')}</Txt>
       ) : (
         <>
+          <Txt style={{ color: colors.muted }}>{t('remindersSummary')}</Txt>
           <Button
             title={t(
               preferences.enabled ? 'disableReminders' : 'enableReminders',
