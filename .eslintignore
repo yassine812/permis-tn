@@ -1,0 +1,7 @@
+artifacts/
+preview-dist/
+node_modules/
+**/build/
+**/.cxx/
+**/.gradle/
+**/Pods/

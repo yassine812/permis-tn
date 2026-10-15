@@ -1,0 +1,58 @@
+name: Build iPhone IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-personal-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      CI: 'true'
+      EXTRA_PACKAGER_ARGS: --max-workers 2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a # v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: false
+      - name: Install JavaScript dependencies
+        run: npm ci
+      - name: Install iOS dependencies
+        run: |
+          bundle config set --local path vendor/bundle
+          bundle install --jobs 2 --retry 3
+          cd ios
+          bundle exec pod install
+      - name: Build unsigned iPhone package
+        run: bash scripts/build-ios-unsigned.sh
+      - name: Downloadable iPhone package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: PermisTN-iPhone
+          path: |
+            artifacts/PermisTN-unsigned.ipa
+            artifacts/PermisTN-unsigned.ipa.sha256
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: iPhone-build-log
+          path: artifacts/ios-build.log
+          if-no-files-found: ignore
+          retention-days: 1
