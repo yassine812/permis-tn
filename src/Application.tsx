@@ -54,6 +54,12 @@ import { useReminders } from './useReminders';
 import { ReminderSettings } from './ReminderSettings';
 import { WebInstall, BackupDownload, BackupFilePicker } from './WebFeatures';
 import { StudentAccount, BillingForm, HoursForm } from './account';
+import {
+  PortalSettings,
+  StudentAccess,
+  StudentLoginLink,
+  usePortalSync,
+} from './Portal';
 
 type Tab = 'home' | 'students' | 'calendar' | 'settings';
 type Sheet = {
@@ -82,6 +88,7 @@ const parentOf = (sheet: Sheet | null) =>
 
 export default function Application() {
   const [data, setData] = useState<Data | null>(null);
+  usePortalSync(data);
   const [loadError, setLoadError] = useState(false);
   const [tab, setTab] = useState<Tab>('home');
   const [sheet, setSheet] = useState<Sheet | null>(null);
@@ -427,6 +434,7 @@ export default function Application() {
           }
         />
         <Txt style={s.sectionTitle}>{t('candidateFolder')}</Txt>
+        <StudentAccess student={st} commit={commit} busy={busy} />
         <Button
           secondary
           title={t('edit')}
@@ -903,6 +911,8 @@ export default function Application() {
                   <SettingsForm data={data} commit={commit} busy={busy} />
                 </View>
                 <WebInstall />
+                <PortalSettings />
+                <StudentLoginLink />
                 <View style={[s.card, { padding: 20 }]}>
                   <ReminderSettings
                     data={data}

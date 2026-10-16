@@ -6,7 +6,7 @@ import { getOfflineState, watchOfflineState, installApp } from './pwa.web';
 const copy = {
   fr: {
     title: 'Votre carnet, sur l’écran d’accueil',
-    intro: 'Gratuit. Sans câble, sans compte, sans abonnement.',
+    intro: 'Votre carnet hors ligne, sans câble ni abonnement.',
     install: 'Installer Permis TN',
     ios: 'Sur iPhone : ouvrez ce lien dans Safari → Partager (le carré avec une flèche) → Sur l’écran d’accueil → Ajouter. Activez « Ouvrir comme app web » si proposé.',
     other:
@@ -18,7 +18,7 @@ const copy = {
     update:
       'Une mise à jour est prête. Fermez toutes les fenêtres Permis TN, puis rouvrez l’app.',
     local:
-      'Vos élèves restent sur cet appareil. Exportez une sauvegarde régulièrement : effacer les données du navigateur peut les supprimer.',
+      'Votre carnet complet reste sur cet appareil. Les bilans des élèves avec un accès activé sont synchronisés en ligne. Exportez régulièrement une sauvegarde du carnet.',
     reminders:
       'Cette version ne sonne pas à 06:00 ni avant ou après les séances quand elle est fermée.',
     download: 'Télécharger la sauvegarde .json',
@@ -27,7 +27,7 @@ const copy = {
   },
   ar: {
     title: 'دفترك على الشاشة الرئيسية',
-    intro: 'بلاش. بلا كابل، بلا حساب، بلا اشتراك.',
+    intro: 'دفترك يخدم بلا إنترنت، بلا كابل وبلا اشتراك.',
     install: 'ثبّت Permis TN',
     ios: 'على آيفون: حلّ الرابط في Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية ← إضافة. فعّل «فتح كتطبيق ويب» إذا تظهرلك.',
     other:
@@ -38,7 +38,7 @@ const copy = {
       'الخدمة بلا إنترنت موش جاهزة. ارجع اتّصل بالإنترنت وعاود حلّ الصفحة.',
     update: 'فمّا تحديث جاهز. سكّر نوافذ Permis TN الكل وعاود حلّ التطبيق.',
     local:
-      'معطيات التلامذة تبقى في الجهاز هذا. خزّن نسخة احتياطية بانتظام: مسح بيانات المتصفّح ينجم يمسحها.',
+      'دفترك الكامل يبقى في جهازك. حسابات التلامذة اللي فعّلت دخولهم تتحدّث بالإنترنت. خزّن نسخة احتياطية بانتظام.',
     reminders:
       'النسخة هاذي ما تبعثش تذكير مع الستّة ولا قبل وبعد الحصص كي تكون مسكّرة.',
     download: 'نزّل نسخة احتياطية .json',

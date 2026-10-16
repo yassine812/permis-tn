@@ -45,6 +45,17 @@ export default defineConfig(({ command }) => ({
   define: {
     __DEV__: JSON.stringify(command === 'serve'),
   },
-  server: { host: '127.0.0.1', port: 5189, strictPort: true },
+  server: {
+    host: '127.0.0.1',
+    port: 5189,
+    strictPort: true,
+    proxy: {
+      '/api/portal': {
+        target: 'https://permis-tn.vercel.app',
+        changeOrigin: true,
+        headers: { origin: 'https://permis-tn.vercel.app' },
+      },
+    },
+  },
   build: { outDir: 'preview-dist' },
 }));

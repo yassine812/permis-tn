@@ -155,7 +155,7 @@ const fr = {
   language: 'Langue',
   backup: 'Vos données vous appartiennent',
   backupHint:
-    'Aucun serveur, aucune synchronisation. Exportez régulièrement une copie, surtout avant de changer de téléphone ou de désinstaller l’application.',
+    'Exportez régulièrement le carnet complet, surtout avant de changer de téléphone ou de désinstaller l’application. Le bilan en ligne des élèves ne remplace pas cette sauvegarde.',
   export: 'Exporter une sauvegarde',
   import: 'Restaurer une sauvegarde',
   backupText: 'Contenu JSON de la sauvegarde',
@@ -166,7 +166,7 @@ const fr = {
     'Cette opération remplace toutes les données de ce téléphone. Exportez d’abord votre sauvegarde actuelle.',
   restoreTitle: 'Remplacer les données locales ?',
   localNote:
-    'Pensée pour les moniteurs en Tunisie. Sans publicité, sans abonnement, sans compte. Horaires de Tunis.',
+    'Pensée pour les moniteurs en Tunisie. Sans publicité ni abonnement. Horaires de Tunis.',
   saved: 'Enregistré sur ce téléphone',
   loading: 'Ouverture de votre auto-école…',
   error: 'Impossible de continuer',
@@ -402,7 +402,7 @@ const ar: Record<keyof typeof fr, string> = {
   language: 'اللغة',
   backup: 'المعطيات متاعك تبقى عندك',
   backupHint:
-    'بلا سيرفر وبلا مزامنة. اعمل نسخة احتياطية بانتظام وقبل ما تبدّل تليفونك ولا تفسخ التطبيق.',
+    'اعمل نسخة احتياطية للدفتر الكامل بانتظام وقبل ما تبدّل التليفون ولا تفسخ التطبيق. حسابات التلامذة على الإنترنت ما تعوّضش النسخة هاذي.',
   export: 'صدّر نسخة احتياطية',
   import: 'رجّع نسخة احتياطية',
   backupText: 'محتوى نسخة JSON',
@@ -412,8 +412,7 @@ const ar: Record<keyof typeof fr, string> = {
   restoreHint:
     'العملية هاذي تعوّض المعطيات الكل في التليفون. صدّر نسختك الحالية قبل.',
   restoreTitle: 'تعوّض المعطيات المحلية؟',
-  localNote:
-    'للمونيتورات في تونس. بلا إشهار، بلا اشتراك وبلا حساب. توقيت تونس.',
+  localNote: 'للمونيتورات في تونس. بلا إشهار وبلا اشتراك. توقيت تونس.',
   saved: 'تسجّل في تليفونك',
   loading: 'قاعدين نحلّو مدرسة السياقة…',
   error: 'ما نجّمش نكمّل',

@@ -7,19 +7,19 @@ import vm from 'node:vm';
 const source = await readFile('preview-dist/sw.js', 'utf8');
 const scope = 'https://example.test/permis-tn/';
 const url = path => new URL(path, scope).href;
-function runtime({ failInstall = false } = {}) {
+function runtime({ failInstall = false, workerScope = scope } = {}) {
   const listeners = {};
   const records = new Map();
   const cacheNames = new Map([
     ['unrelated-app', new Map()],
-    [`permis-tn:${scope}:old`, new Map()],
+    [`permis-tn:${workerScope}:old`, new Map()],
   ]);
   let network = 0;
   let precached = [];
   const context = {
     URL,
     self: {
-      registration: { scope },
+      registration: { scope: workerScope },
       clients: { claim: async () => {} },
       addEventListener: (name, listener) => {
         listeners[name] = listener;
@@ -61,7 +61,7 @@ function runtime({ failInstall = false } = {}) {
   const request = (path, mode = 'cors', method = 'GET') => {
     let response;
     listeners.fetch({
-      request: { url: url(path), mode, method },
+      request: { url: new URL(path, workerScope).href, mode, method },
       respondWith: value => {
         response = value;
       },
@@ -120,4 +120,14 @@ test('student writes and other origins are never intercepted', async () => {
   const worker = runtime();
   assert.equal(worker.request('data', 'cors', 'POST'), undefined);
   assert.equal(worker.request('https://other.example/'), undefined);
+});
+
+test('private portal GET responses bypass even the root-scope offline cache', () => {
+  const worker = runtime({ workerScope: 'https://example.test/' });
+  assert.equal(worker.request('/api/portal?action=dashboard'), undefined);
+  assert.equal(
+    worker.request('/api/portal?action=session', 'navigate'),
+    undefined,
+  );
+  assert.equal(worker.network, 0);
 });

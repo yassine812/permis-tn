@@ -19,6 +19,7 @@ export type Student = {
   notes: string;
   archived: boolean;
   hourlyRate?: number | null; // One candidate-specific price for all three stages.
+  portalEnabled?: boolean;
   rates: Record<Stage, number | null>; // Preserved pre-v4 prices, for backup history only.
   amountPaid: number | null; // Legacy payment not yet allocated to a category.
   paidByStage: Record<Stage, number>;
@@ -117,6 +118,12 @@ export const hours = (value: number) =>
     .toString()
     .replace('.', ',');
 export function validateStudent(student: Student) {
+  if (
+    student.portalEnabled !== undefined &&
+    typeof student.portalEnabled !== 'boolean'
+  ) {
+    throw new ValidationError('dataError');
+  }
   if (student.hourlyRate !== undefined && student.hourlyRate !== null) {
     validateMoney(student.hourlyRate);
   }

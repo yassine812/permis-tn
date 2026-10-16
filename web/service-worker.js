@@ -28,6 +28,7 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   if (
     request.method !== 'GET' ||
+    new URL(request.url).pathname.startsWith('/api/') ||
     !request.url.startsWith(self.registration.scope)
   ) {
     return;

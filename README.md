@@ -10,9 +10,31 @@ Ouvrir **https://permis-tn.vercel.app/** sur le téléphone.
 
 Attendre **« Prêt à fonctionner hors connexion »** avant de couper Internet. Les élèves, séances, tarifs, examens et paiements fonctionnent ensuite hors ligne. Cette version web ne nécessite pas de renouvellement de signature tous les 7 jours. Les rappels à 06:00 et avant/après les séances ne sont pas disponibles quand elle est fermée.
 
-Les données restent dans IndexedDB sur chaque appareil, sans serveur ni synchronisation. Exporter régulièrement une sauvegarde JSON dans Réglages : effacer les données du navigateur peut les supprimer. Installer d’abord l’app puis y saisir ses données ; si Safari et l’app installée affichent des données différentes, utiliser l’export/import JSON pour les transférer. Les mises à jour se téléchargent en ligne et prennent effet après fermeture de toutes les fenêtres Permis TN ; elles ne rechargent pas un formulaire ouvert.
+Le carnet complet reste dans IndexedDB sur chaque appareil. Sur Vercel, les bilans des élèves dont l’accès est activé sont synchronisés dans un stockage privé, pour consultation avec identifiant et mot de passe. Cette synchronisation ne transfère pas le carnet complet entre téléphones. Exporter régulièrement une sauvegarde JSON dans Réglages : effacer les données du navigateur peut les supprimer. Installer d’abord l’app puis y saisir ses données ; si Safari et l’app installée affichent des données différentes, utiliser l’export/import JSON pour les transférer. Les mises à jour se téléchargent en ligne et prennent effet après fermeture de toutes les fenêtres Permis TN ; elles ne rechargent pas un formulaire ouvert.
 
 Les données de l’ancienne adresse GitHub Pages ne se transfèrent pas automatiquement vers Vercel. Exporter une sauvegarde depuis l’ancienne adresse, puis la restaurer sur la nouvelle.
+
+## Accès des élèves sur iPhone et Android
+
+Cette fonction est disponible sur **https://permis-tn.vercel.app/**, dans Safari/Chrome et l’app installée depuis ce site. Les anciens APK/IPA et GitHub Pages ne disposent pas de ce serveur.
+
+1. Dans **Réglages → Espace élève**, connecter le compte **moniteur**. Son mot de passe privé est remis séparément au propriétaire ; il ne figure pas dans ce dépôt.
+2. Ajouter un candidat et son tarif horaire. Son accès est créé automatiquement lorsque le moniteur est connecté à Internet. Pour un ancien candidat, ouvrir sa fiche et choisir **Créer l’accès élève**.
+3. Dans sa fiche, **Espace élève** affiche son identifiant et son mot de passe. **Copier les identifiants** copie aussi le lien https://permis-tn.vercel.app/?espace=eleve . Les remettre uniquement à l’élève concerné.
+4. L’élève se connecte sur son téléphone : heures effectuées, montant payé, reste à payer, avances et cartes Code / Conduite / Manœuvre. Il ne peut modifier ni les heures ni les paiements.
+5. Le mot de passe est affiché seulement après création ou réinitialisation. S’il n’a pas été conservé, utiliser **Réinitialiser le mot de passe** ; les anciennes sessions deviennent invalides. **Désactiver l’accès** ou archiver le candidat bloque son accès après synchronisation.
+
+Le moniteur peut continuer à saisir ses données hors ligne. Il doit rouvrir l’app avec Internet et une session moniteur valide pour envoyer les changements ; l’écran indique l’état d’envoi. Le tableau de bord élève nécessite Internet, affiche la date du dernier bilan et s’actualise au retour dans la page ou toutes les cinq minutes lorsqu’elle est visible. Le bouton Actualiser permet de vérifier immédiatement. Sur un téléphone partagé, se déconnecter ; le carnet local du moniteur reste accessible aux personnes ayant accès à son appareil.
+
+Seuls le nom de l’élève, le nom de l’école, la progression, les résultats et les totaux d’heures/paiements sont transmis. Téléphone, notes et planning détaillé restent locaux. Les mots de passe sont hachés avec scrypt côté serveur ; les sessions signées utilisent un cookie HttpOnly, Secure et SameSite. Le service worker ne met jamais les réponses API en cache. Les sauvegardes JSON restent indispensables et ne contiennent pas les mots de passe des comptes.
+
+### Configuration du serveur Vercel
+
+Le projet utilise une boutique **Vercel Blob privée** liée à l’environnement production, plus `PORTAL_OWNER_HASH` (format `sel:hash` scrypt) et `PORTAL_SESSION_SECRET` (secret aléatoire). Ces deux variables sont sensibles ; ne jamais les ajouter au dépôt, au bundle client ou à une sauvegarde partagée. L’identifiant moniteur est `moniteur`. Le stockage utilise l’authentification Blob fournie par Vercel. Le domaine autorisé pour les écritures est configuré dans `api/portal.mjs`.
+
+Le serveur contrôle l’accès à chaque requête, limite les échecs de connexion et conserve les comptes dans un objet privé avec lectures cohérentes et écritures conditionnelles. La limite applicative est de 500 comptes pour cette école. Le bilan en ligne n’est pas une sauvegarde complète du carnet. Les coûts et quotas restent ceux du plan Vercel du propriétaire ; aucun plan payant n’est activé par l’app.
+
+Le développement Vite transmet `/api/portal` au serveur de production : les actions de compte y sont réelles. Utiliser des candidats fictifs pour les essais. L’URL `?espace=moniteur` ouvre explicitement le carnet ; `?espace=eleve` ouvre la connexion élève. Le dernier espace choisi est conservé pour l’ouverture depuis l’écran d’accueil.
 
 ## Fonctionnement
 
@@ -54,7 +76,7 @@ La file réserve une place au rappel quotidien et programme les **49 prochains r
 
 Le code et la programmation sont testés ; la réception réelle, le redémarrage du téléphone et les actions depuis l'écran verrouillé doivent encore être vérifiés sur des appareils Android/iPhone. Références : [déclencheurs Notifee](https://notifee.app/react-native/docs/triggers/), [événements](https://notifee.app/react-native/docs/events/).
 
-Pas de compte, serveur, abonnement, publicité ni service payant. Les données sont enregistrées sur l’appareil avec AsyncStorage 3 (stockage natif local). L’application ne synchronise pas les téléphones. Les sauvegardes système iOS restent soumises aux réglages du téléphone ; la sauvegarde automatique Android est désactivée.
+La gestion native hors ligne ne demande pas de compte et utilise AsyncStorage 3. La version web/PWA sur Vercel propose en plus des comptes élèves et un stockage privé des bilans ; elle ne synchronise pas le carnet complet entre téléphones. Aucun abonnement n’a été souscrit : l’hébergement utilise le plan Hobby et ses quotas gratuits. Un quota atteint peut interrompre le service en ligne. Les sauvegardes système iOS restent soumises aux réglages du téléphone ; la sauvegarde automatique Android est désactivée.
 
 Un premier lancement ne contient aucune donnée de démonstration. Les tests de l’aperçu utilisent une base navigateur séparée des appareils mobiles. Exportez une sauvegarde avant de désinstaller ou changer de téléphone.
 
@@ -117,12 +139,12 @@ npm run typecheck
 npm test -- --runInBand --testTimeout=15000
 npm run lint -- --quiet
 npm run web:build
-node --test web/offline.test.mjs
+node --test web/offline.test.mjs server/*.test.mjs
 npm run bundle:android -- --max-workers 2
 npm run bundle:ios -- --max-workers 2
 ```
 
-Les 48 tests couvrent le parcours, les numéros tunisiens, le calendrier, les conflits, les heures par niveau, les prix, les soldes et les migrations, les sauvegardes, les erreurs de stockage et les rappels (horaires tunisiens, annulations, autorisations, limite de file et ouverture de la bonne séance). Les bundles JavaScript des deux plateformes peuvent être vérifiés sur Windows ; cela ne compile pas à lui seul les applications natives.
+Les tests couvrent le parcours, les numéros tunisiens, le calendrier, les conflits, les heures par niveau, les prix, les soldes et les migrations, les sauvegardes, les erreurs de stockage et les rappels (horaires tunisiens, annulations, autorisations, limite de file et ouverture de la bonne séance). Les bundles JavaScript des deux plateformes peuvent être vérifiés sur Windows ; cela ne compile pas à lui seul les applications natives.
 
 Le SDK Android et le JDK sont installés sur ce poste Windows ; `scripts/build-android.ps1` produit le paquet personnel ARM64. L'IPA iOS 15.1+ ARM64 a été compilé sur le Mac GitHub ; son contenu et son bundle hors ligne ont été vérifiés. Aucun essai sur téléphone physique n'a encore été effectué. L'IPA doit être signé lors de son installation avec AltStore Classic. Tester l’installation, le redémarrage en mode avion, les notifications écran verrouillé, le clavier, les sauvegardes et le rendu arabe sur téléphone avant distribution.
 
@@ -135,6 +157,9 @@ La vérification Android AGP 9.2 signale à tort `MainActivity must extend andro
 ## Structure
 
 - `src/domain.ts` : règles métier et validation des sauvegardes.
+- `src/Portal.web.jsx`, `src/StudentPortal.web.jsx` : comptes et tableau de bord élève web.
+- `src/studentDashboard.ts` : projection des seules données destinées à l’élève.
+- `api/portal.mjs`, `server/` : authentification et stockage privé.
 - `src/storage.ts` : lecture/écriture locale, schéma v4 avec migration v2/v3.
 - `src/Application.tsx` : écrans et navigation.
 - `src/planner.tsx` : agenda hebdomadaire et créneaux libres.

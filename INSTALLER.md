@@ -8,7 +8,17 @@
 
 Sur Android, ouvrir le même lien dans Chrome puis **menu → Installer l’application**. Aucun câble, compte Apple Developer ou renouvellement hebdomadaire n’est nécessaire.
 
-Les élèves, heures, examens, calendrier et paiements restent disponibles hors ligne. Cette version n’envoie pas les rappels lorsque l’app est fermée. Sauvegarder régulièrement via **Réglages → Exporter une sauvegarde → Télécharger la sauvegarde .json**. Pour restaurer, choisir le fichier dans **Restaurer une sauvegarde**, puis confirmer l’import. Les données sont locales à l’appareil et ne sont pas publiées sur GitHub.
+Les élèves, heures, examens, calendrier et paiements restent disponibles hors ligne. Cette version n’envoie pas les rappels lorsque l’app est fermée. Sauvegarder régulièrement via **Réglages → Exporter une sauvegarde → Télécharger la sauvegarde .json**. Pour restaurer, choisir le fichier dans **Restaurer une sauvegarde**, puis confirmer l’import. Le carnet complet est local à l’appareil et n’est pas publié sur GitHub. Les bilans des élèves avec accès activé sont envoyés dans le stockage privé du portail.
+
+## Donner accès à un élève
+
+Dans la version Vercel, ouvrir **Réglages → Espace élève** et connecter le compte moniteur avec le mot de passe remis séparément. Ajouter le candidat : son identifiant et son mot de passe apparaissent dans sa fiche, rubrique **Espace élève**, après synchronisation. Pour un ancien candidat, choisir **Créer l’accès élève**.
+
+Copier ses identifiants et les remettre au candidat avec **https://permis-tn.vercel.app/?espace=eleve**. Il pourra consulter uniquement son bilan : heures effectuées, payé, reste à payer et détail des trois catégories. Il ne peut pas modifier ces données. Les connexions et mises à jour du bilan nécessitent Internet ; les saisies du moniteur restent disponibles hors ligne et sont envoyées au prochain retour connecté dans l’app.
+
+Le mot de passe n’est affiché qu’après création ou réinitialisation. Le bouton **Réinitialiser le mot de passe** invalide l’ancien mot de passe et les sessions en cours. **Désactiver l’accès** bloque le compte une fois la synchronisation effectuée. Conserver le mot de passe moniteur pour soi.
+
+Pour recevoir une mise à jour du site déjà installé, ouvrir l’app en ligne, fermer toutes ses fenêtres puis la rouvrir. Les anciens APK/IPA ci-dessous n’intègrent pas le portail élève ; utiliser la version Vercel pour cette fonction.
 
 ## Android natif
 

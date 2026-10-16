@@ -46,6 +46,7 @@ export function StudentForm({
       stage: 'code',
       notes: '',
       archived: false,
+      portalEnabled: true,
       rates: blankRates(),
       amountPaid: 0,
       paidByStage: blankPayments(),
