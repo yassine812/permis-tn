@@ -1,17 +1,8 @@
+import { useTheme, lightColors, darkColors, Palette } from './theme';
 import React, { useContext, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Data, dateLabel, Lesson, minutes, tunisNow } from './domain';
-import {
-  Badge,
-  Button,
-  colors,
-  Icon,
-  IconButton,
-  Locale,
-  Row,
-  Txt,
-  useT,
-} from './ui';
+import { Badge, Button, Icon, IconButton, Locale, Row, Txt, useT } from './ui';
 
 const shiftDay = (date: string, days: number) => {
   const next = new Date(`${date}T12:00:00Z`);
@@ -31,6 +22,8 @@ export function Planner({
   onStudent: (id: string) => void;
   onNewStudent: () => void;
 }) {
+  const { colors } = useTheme();
+  const p = useLocalStyles();
   const t = useT();
   const lang = useContext(Locale);
   const today = tunisNow().date;
@@ -117,7 +110,7 @@ export function Planner({
                   style={[
                     p.day,
                     selected && {
-                      backgroundColor: colors.blue,
+                      backgroundColor: colors.primary,
                       borderColor: colors.blue,
                     },
                   ]}
@@ -194,7 +187,7 @@ export function Planner({
               style={[
                 p.checkbox,
                 showFree && {
-                  backgroundColor: colors.blue,
+                  backgroundColor: colors.primary,
                   borderColor: colors.blue,
                 },
               ]}
@@ -322,79 +315,86 @@ export function Planner({
     </View>
   );
 }
-const p = StyleSheet.create({
-  title: {
-    fontSize: 36,
-    lineHeight: 44,
-    fontWeight: '800',
-    letterSpacing: -1.6,
-  },
-  eyebrow: { fontSize: 12, lineHeight: 18, color: colors.muted },
-  today: {
-    paddingHorizontal: 12,
-    minHeight: 36,
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 6,
-  },
-  day: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: 'center',
-    paddingVertical: 10,
-    gap: 7,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  summary: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#EEEFEA',
-    borderRadius: 8,
-  },
-  number: {
-    fontSize: 27,
-    lineHeight: 32,
-    fontWeight: '700',
-    letterSpacing: -1,
-  },
-  checkbox: {
-    width: 16,
-    height: 16,
-    borderRadius: 3,
-    borderWidth: 1,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lesson: {
-    backgroundColor: '#EAF0FF',
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.blue,
-  },
-  free: {
-    minHeight: 44,
-    borderBottomWidth: 1,
-    borderColor: colors.line,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  student: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-  },
-  initial: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: '#EEEFEA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    title: {
+      fontSize: 36,
+      lineHeight: 44,
+      fontWeight: '800',
+      letterSpacing: -1.6,
+    },
+    eyebrow: { fontSize: 12, lineHeight: 18, color: colors.muted },
+    today: {
+      paddingHorizontal: 12,
+      minHeight: 36,
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.line,
+      borderRadius: 6,
+    },
+    day: {
+      flex: 1,
+      minWidth: 0,
+      alignItems: 'center',
+      paddingVertical: 10,
+      gap: 7,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    summary: {
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      backgroundColor: colors.soft,
+      borderRadius: 8,
+    },
+    number: {
+      fontSize: 27,
+      lineHeight: 32,
+      fontWeight: '700',
+      letterSpacing: -1,
+    },
+    checkbox: {
+      width: 16,
+      height: 16,
+      borderRadius: 3,
+      borderWidth: 1,
+      borderColor: colors.line,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    lesson: {
+      backgroundColor: colors.blueSoft,
+      padding: 16,
+      borderRadius: 8,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.blue,
+    },
+    free: {
+      minHeight: 44,
+      borderBottomWidth: 1,
+      borderColor: colors.line,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    student: {
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.line,
+    },
+    initial: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      backgroundColor: colors.soft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+
+const lightStyles = createStyles(lightColors);
+const darkStyles = createStyles(darkColors);
+function useLocalStyles() {
+  return useTheme().mode === 'dark' ? darkStyles : lightStyles;
+}

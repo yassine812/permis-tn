@@ -1,7 +1,8 @@
+import { useTheme } from './theme';
 /* eslint-env browser */
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { Button, colors, Locale, Txt } from './ui';
+import { Button, Locale, Txt } from './ui';
 import { getOfflineState, watchOfflineState, installApp } from './pwa.web';
 const copy = {
   fr: {
@@ -50,6 +51,7 @@ const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches ||
   navigator.standalone === true;
 export function WebInstall({ compact = false }) {
+  const { colors } = useTheme();
   const language = useContext(Locale);
   const text = copy[language];
   const [status, setStatus] = useState(getOfflineState);
@@ -82,7 +84,7 @@ export function WebInstall({ compact = false }) {
       style={{
         padding: 16,
         gap: 10,
-        backgroundColor: '#EAF0FF',
+        backgroundColor: colors.blueSoft,
         borderRadius: 12,
       }}
     >

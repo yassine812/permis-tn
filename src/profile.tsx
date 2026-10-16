@@ -1,3 +1,4 @@
+import { useTheme, lightColors, darkColors, Palette } from './theme';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import {
@@ -14,7 +15,6 @@ import {
 import {
   Badge,
   Button,
-  colors,
   Icon,
   IconName,
   Locale,
@@ -23,7 +23,7 @@ import {
   Txt,
   useT,
 } from './ui';
-import { styles as s } from './styles';
+import { useStyles } from './styles';
 
 export function StudentAccount({
   data,
@@ -46,6 +46,9 @@ export function StudentAccount({
   busy: boolean;
   initialStage?: Stage;
 }) {
+  const { colors } = useTheme();
+  const s = useStyles();
+  const p = useLocalStyles();
   const t = useT();
   const language = useContext(Locale);
   const account = studentAccount(data, student);
@@ -193,7 +196,7 @@ export function StudentAccount({
               style={[
                 p.category,
                 selected && {
-                  backgroundColor: '#F0F3FF',
+                  backgroundColor: colors.blueSoft,
                   borderColor: colors.blue,
                 },
               ]}
@@ -311,11 +314,6 @@ export function StudentAccount({
           <Txt style={s.muted}>{t('levelTotal')}</Txt>
           <Txt style={{ fontWeight: '700' }}>{money(row.total, language)}</Txt>
         </Row>
-        {!!row.credit && (
-          <Txt style={{ color: colors.green }}>
-            {t('credit')}: {money(row.credit, language)}
-          </Txt>
-        )}
       </View>
       <View style={[s.card, { padding: 18, gap: 14 }]}>
         <Row>
@@ -414,11 +412,6 @@ export function StudentAccount({
               <Txt>{t('amountPaid')}</Txt>
               <Txt>{money(account.paid, language)}</Txt>
             </Row>
-            {!!account.credit && (
-              <Txt>
-                {t('credit')}: {money(account.credit, language)}
-              </Txt>
-            )}
             <Button
               title={t('editBilling')}
               secondary
@@ -446,46 +439,57 @@ export function StudentAccount({
     </View>
   );
 }
-const p = StyleSheet.create({
-  hero: {
-    paddingVertical: 8,
-    gap: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-    paddingBottom: 22,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: '#EBEDE7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  category: {
-    flex: 1,
-    minWidth: 0,
-    padding: 12,
-    gap: 8,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  action: {
-    flex: 1,
-    minHeight: 64,
-    alignItems: 'center',
-    gap: 8,
-    justifyContent: 'center',
-  },
-  actionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notice: { backgroundColor: '#FCF2D9', padding: 12, borderRadius: 12 },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    hero: {
+      paddingVertical: 8,
+      gap: 18,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.line,
+      paddingBottom: 22,
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      backgroundColor: colors.soft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    category: {
+      flex: 1,
+      minWidth: 0,
+      padding: 12,
+      gap: 8,
+      borderRadius: 8,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.line,
+    },
+    action: {
+      flex: 1,
+      minHeight: 64,
+      alignItems: 'center',
+      gap: 8,
+      justifyContent: 'center',
+    },
+    actionIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      backgroundColor: colors.blueSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    notice: {
+      backgroundColor: colors.warningSoft,
+      padding: 12,
+      borderRadius: 12,
+    },
+  });
+
+const lightStyles = createStyles(lightColors);
+const darkStyles = createStyles(darkColors);
+function useLocalStyles() {
+  return useTheme().mode === 'dark' ? darkStyles : lightStyles;
+}

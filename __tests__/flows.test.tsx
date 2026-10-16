@@ -104,7 +104,7 @@ test('new candidate needs one price then manual hours ask paid or unpaid and upd
     renderer.root
       .findAllByType(Field)
       .some(n => n.props.label.includes('Nombre d’heures')),
-  ).toBe(false);
+  ).toBe(true);
   await pressButton('Continuer au paiement');
   expect(savedData().hourEntries).toHaveLength(0);
   await pressButton('Payé · Enregistrer');
@@ -293,6 +293,7 @@ test('student profile persists exam results and per-category payments separately
     conduite: 20500,
     manoeuvre: 0,
   });
+  expect(JSON.stringify(renderer.toJSON())).not.toContain('Avance disponible');
   expect(
     renderer.root.findByType(StudentAccount).props.student.examResults.code,
   ).toBe('passed');
@@ -312,4 +313,78 @@ test('candidate tariff editor saves one candidate-specific price and returns to 
   expect(renderer.root.findByType(StudentAccount).props.student.id).toBe(
     'test',
   );
+});
+
+test('manual hours accept a quantity and charge that quantity once when paid', async () => {
+  await pressAccessible('Test élève');
+  await pressAccessible('Ajouter des heures');
+  await fill('Nombre d’heures effectuées', '3');
+  await pressButton('Continuer au paiement');
+  expect(JSON.stringify(renderer.toJSON())).toContain(
+    'Ces heures sont-elles payées',
+  );
+  await pressButton('Payé · Enregistrer');
+  const data = savedData();
+  expect(data.hourEntries).toHaveLength(1);
+  expect(data.hourEntries[0]).toMatchObject({
+    duration: 180,
+    paid: true,
+    paidAmount: 90000,
+  });
+  expect(studentAccount(data, data.students[0])).toMatchObject({
+    minutes: 180,
+    paid: 90000,
+    due: 0,
+  });
+  await pressAccessible('Ajouter des heures');
+  await fill('Nombre d’heures effectuées', '2,5');
+  await pressButton('Continuer au paiement');
+  await pressButton('Non payé · Enregistrer');
+  const updated = savedData();
+  expect(studentAccount(updated, updated.students[0])).toMatchObject({
+    minutes: 330,
+    paid: 90000,
+    due: 75000,
+  });
+});
+
+test('invalid manual quantity is rejected before saving or showing payment choices', async () => {
+  await pressAccessible('Test élève');
+  await pressAccessible('Ajouter des heures');
+  const writes = db.setItem.mock.calls.length;
+  await fill('Nombre d’heures effectuées', '0');
+  await pressButton('Continuer au paiement');
+  expect(db.setItem.mock.calls.length).toBe(writes);
+  expect(JSON.stringify(renderer.toJSON())).toContain('Saisissez entre 0,25');
+});
+
+test('appearance changes persist separately and apply after reopening without modifying the student ledger', async () => {
+  await pressAccessible('Réglages');
+  await pressChip('Mode sombre');
+  expect(db.setItem).toHaveBeenLastCalledWith('appearance', 'dark');
+  expect(JSON.stringify(renderer.toJSON())).toContain('#121619');
+  const data = emptyData();
+  data.students = [student];
+  db.getItem.mockImplementation(async (key: string) =>
+    key === 'appearance' ? 'dark' : JSON.stringify(data),
+  );
+  await ReactTestRenderer.act(async () => {
+    renderer.unmount();
+  });
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<App />);
+  });
+  expect(JSON.stringify(renderer.toJSON())).toContain('#121619');
+  await pressAccessible('Test élève');
+  await pressAccessible('Ajouter des heures');
+  expect(JSON.stringify(renderer.toJSON())).toContain('#1C2227');
+  await pressAccessible('Retour');
+  await pressAccessible('Fermer');
+  await pressAccessible('Réglages');
+  await pressChip('Mode clair');
+  expect(db.setItem).toHaveBeenLastCalledWith('appearance', 'light');
+  expect(JSON.stringify(renderer.toJSON())).toContain('#FAFAF7');
+  expect(
+    db.setItem.mock.calls.every(([key]: [string]) => key === 'appearance'),
+  ).toBe(true);
 });

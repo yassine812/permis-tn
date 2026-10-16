@@ -8,8 +8,9 @@ const fr = {
   candidateRateSettings:
     'Le prix de l’heure se règle dans la fiche de chaque candidat, pour les trois catégories.',
   paymentPrompt: 'Cette heure est-elle payée ?',
+  paymentPromptMany: 'Ces heures sont-elles payées ?',
   paymentPromptHint:
-    'Votre choix enregistre l’heure et met à jour le bilan du candidat.',
+    'Votre choix enregistre les heures et met à jour le bilan du candidat.',
   savePaid: 'Payé · Enregistrer',
   saveUnpaid: 'Non payé · Enregistrer',
   continuePayment: 'Continuer au paiement',
@@ -81,6 +82,9 @@ const fr = {
   calendar: 'Agenda',
   payments: 'Paiements',
   settings: 'Réglages',
+  appearance: 'Apparence',
+  lightMode: 'Mode clair',
+  darkMode: 'Mode sombre',
   greeting: 'Votre journée,',
   hero: 'en bonne voie.',
   subtitle: 'Votre auto-école, bien organisée.',
@@ -220,7 +224,6 @@ const fr = {
   totalCost: 'Total à payer',
   amountPaid: 'Montant déjà payé',
   balanceDue: 'Reste à payer',
-  credit: 'Avance disponible',
   editBilling: 'Paiements par catégorie',
   editPayment: 'Modifier le paiement',
   sharedRates: 'Tarifs horaires de l’auto-école',
@@ -237,7 +240,7 @@ const fr = {
   repriceHint:
     'Ce prix s’applique aux trois catégories de ce candidat. Le modifier recalcule ses heures effectuées ; les montants déjà reçus restent inchangés.',
   amountPaidHint:
-    'Pour chaque catégorie, saisissez le montant total réellement reçu, pas seulement le dernier versement. Indiquez 0 si rien n’a été payé. Une avance reste dans sa catégorie.',
+    'Pour chaque catégorie, saisissez le montant total réellement reçu, pas seulement le dernier versement. Indiquez 0 si rien n’a été payé.',
   manualHoursHint:
     'Ajoutez ici des heures déjà effectuées qui ne figurent pas dans l’agenda. Les séances marquées effectuées sont comptées automatiquement : ne les ajoutez pas une deuxième fois.',
   hoursToAdd: 'Nombre d’heures effectuées',
@@ -259,7 +262,8 @@ const ar: Record<keyof typeof fr, string> = {
   candidateRateSettings:
     'سوم الساعة يتحدّد في ملفّ كل تلميذ، وهو نفسه للمراحل الثلاثة.',
   paymentPrompt: 'الساعة هاذي خالصة؟',
-  paymentPromptHint: 'اختيارك يسجّل الساعة ويحدّث حساب التلميذ.',
+  paymentPromptMany: 'الساعات هاذم خالصين؟',
+  paymentPromptHint: 'اختيارك يسجّل الساعات ويحدّث حساب التلميذ.',
   savePaid: 'خالصة · سجّل',
   saveUnpaid: 'موش خالصة · سجّل',
   continuePayment: 'كمّل للخلاص',
@@ -329,6 +333,9 @@ const ar: Record<keyof typeof fr, string> = {
   calendar: 'الرزنامة',
   payments: 'الخلاص',
   settings: 'الإعدادات',
+  appearance: 'المظهر',
+  lightMode: 'الوضع الفاتح',
+  darkMode: 'الوضع الداكن',
   greeting: 'نهارك منظّم،',
   hero: 'وخدمتك أسهل.',
   subtitle: 'نظّم خدمة مدرسة السياقة متاعك.',
@@ -461,7 +468,6 @@ const ar: Record<keyof typeof fr, string> = {
   totalCost: 'المجموع المطلوب',
   amountPaid: 'المبلغ اللي تخلّص',
   balanceDue: 'باقي الخلاص',
-  credit: 'تسبقة موجودة',
   editBilling: 'الخلاص حسب المرحلة',
   editPayment: 'بدّل الخلاص',
   sharedRates: 'أسوام الساعة في مدرسة السياقة',
@@ -478,7 +484,7 @@ const ar: Record<keyof typeof fr, string> = {
   repriceHint:
     'السوم هذا للمراحل الثلاثة متاع التلميذ. التغيير يعاود يحسب الساعات اللي تعدّاو، والمبالغ المقبوضة ما تتبدّلش.',
   amountPaidHint:
-    'لكل مرحلة اكتب مجموع الفلوس اللي قبضتهم، موش كان آخر دفعة. اكتب 0 إذا ما خلّص شيء. التسبقة تبقى في نفس المرحلة.',
+    'لكل مرحلة اكتب مجموع الفلوس اللي قبضتهم، موش كان آخر دفعة. اكتب 0 إذا ما خلّص شيء.',
   manualHoursHint:
     'زيد ساعات تعدّاو وموش مسجّلين في الرزنامة. الحصص المعلّمين تعدّاو يتحسبو وحدهم: ما تزيدهمش مرّة أخرى.',
   hoursToAdd: 'عدد الساعات اللي تعدّاو',

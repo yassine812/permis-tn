@@ -1,3 +1,4 @@
+import { useTheme } from './theme';
 import React, { useState } from 'react';
 import { Platform, Switch, View } from 'react-native';
 import { Data } from './domain';
@@ -11,7 +12,7 @@ import {
   openReminderSettings,
   requestReminderPermission,
 } from './notifications';
-import { Button, colors, Row, Txt, useT } from './ui';
+import { Button, Row, Txt, useT } from './ui';
 
 export function ReminderSettings({
   data,
@@ -28,6 +29,7 @@ export function ReminderSettings({
   commit: (change: (data: Data) => Data) => Promise<boolean>;
   busy: boolean;
 }) {
+  const { colors } = useTheme();
   const t = useT();
   const [working, setWorking] = useState(false);
   const [denied, setDenied] = useState(false);

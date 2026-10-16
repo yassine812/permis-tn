@@ -3,6 +3,13 @@ import { Data, emptyData, parseBackup } from './domain';
 
 const storage = createAsyncStorage('permisTN');
 const key = 'data.v4';
+export async function loadTheme(): Promise<'light' | 'dark' | null> {
+  const value = await storage.getItem('appearance');
+  return value === 'light' || value === 'dark' ? value : null;
+}
+export async function persistTheme(value: 'light' | 'dark'): Promise<void> {
+  await storage.setItem('appearance', value);
+}
 export async function loadData(): Promise<Data> {
   const raw = await storage.getItem(key);
   if (raw !== null) {

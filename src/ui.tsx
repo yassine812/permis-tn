@@ -1,3 +1,4 @@
+import { useTheme, lightColors, darkColors, Palette } from './theme';
 import React, { createContext, useContext } from 'react';
 import {
   Pressable,
@@ -12,18 +13,6 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Language, Stage } from './domain';
 import { Key, translate } from './i18n';
 
-export const colors = {
-  bg: '#FAFAF7',
-  ink: '#202224',
-  muted: '#72777B',
-  line: '#E0E2DD',
-  red: '#CB4847',
-  mint: '#E2F3EB',
-  green: '#14765C',
-  amber: '#A96C1E',
-  blue: '#3156D3',
-  white: '#FFFFFF',
-};
 export const Locale = createContext<Language>('fr');
 export const useT = () => {
   const lang = useContext(Locale);
@@ -38,6 +27,7 @@ export function Txt({
   style?: TextStyle | TextStyle[];
   numberOfLines?: number;
 }) {
+  const s = useUIStyles();
   const lang = useContext(Locale);
   return (
     <Text
@@ -59,6 +49,7 @@ export function Row({
   children: React.ReactNode;
   style?: ViewStyle | ViewStyle[];
 }) {
+  const s = useUIStyles();
   const lang = useContext(Locale);
   return (
     <View
@@ -89,13 +80,14 @@ export type IconName =
   | 'shield';
 export function Icon({
   name,
-  color = colors.ink,
+  color,
   size = 22,
 }: {
   name: IconName;
   color?: string;
   size?: number;
 }) {
+  const { colors } = useTheme();
   const paths: Record<IconName, string> = {
     home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z',
     students:
@@ -125,7 +117,7 @@ export function Icon({
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color}
+      stroke={color ?? colors.ink}
       strokeWidth={1.65}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -156,6 +148,8 @@ export function Button({
   icon?: IconName;
   compact?: boolean;
 }) {
+  const { colors } = useTheme();
+  const s = useUIStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -193,6 +187,7 @@ export function IconButton({
   onPress: () => void;
   label: string;
 }) {
+  const s = useUIStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -223,6 +218,8 @@ export function Field({
   ltr?: boolean;
   maxLength?: number;
 }) {
+  const { colors } = useTheme();
+  const s = useUIStyles();
   const lang = useContext(Locale);
   return (
     <View style={{ gap: 8 }}>
@@ -260,6 +257,7 @@ export function Chip({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const s = useUIStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -273,23 +271,18 @@ export function Chip({
     </Pressable>
   );
 }
-export const stageColor = {
-  code: '#32739C',
-  conduite: '#27775E',
-  manoeuvre: '#9A6A34',
-};
 export const stageIcon: Record<Stage, IconName> = {
   code: 'book',
   conduite: 'car',
   manoeuvre: 'flag',
 };
 export function Badge({ stage }: { stage: Stage }) {
+  const { colors } = useTheme();
+  const s = useUIStyles();
   const t = useT();
   return (
-    <View style={[s.badge, { backgroundColor: `${stageColor[stage]}13` }]}>
-      <Txt
-        style={{ fontSize: 11, fontWeight: '700', color: stageColor[stage] }}
-      >
+    <View style={[s.badge, { backgroundColor: `${colors[stage]}13` }]}>
+      <Txt style={{ fontSize: 11, fontWeight: '700', color: colors[stage] }}>
         {t(stage)}
       </Txt>
     </View>
@@ -306,6 +299,8 @@ export function Empty({
   hint?: string;
   action?: React.ReactNode;
 }) {
+  const { colors } = useTheme();
+  const s = useUIStyles();
   return (
     <View style={s.empty}>
       <View style={s.emptyIcon}>
@@ -317,87 +312,94 @@ export function Empty({
     </View>
   );
 }
-export const s = StyleSheet.create({
-  text: { fontSize: 14, lineHeight: 21, color: colors.ink },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  button: {
-    backgroundColor: colors.blue,
-    borderRadius: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 15,
-    minHeight: 50,
-    justifyContent: 'center',
-  },
-  secondary: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  buttonText: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  iconButton: {
-    height: 44,
-    width: 44,
-    borderRadius: 8,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: { fontSize: 12, fontWeight: '700', color: '#566B76' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#DCE4E8',
-    borderRadius: 8,
-    padding: 13,
-    fontSize: 15,
-    color: colors.ink,
-    backgroundColor: '#fff',
-    minHeight: 48,
-  },
-  chip: {
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#fff',
-  },
-  chipActive: { backgroundColor: colors.ink, borderColor: colors.ink },
-  chipText: { fontSize: 12, fontWeight: '600' },
-  badge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 22,
-    gap: 12,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  emptyIcon: {
-    width: 66,
-    height: 66,
-    borderRadius: 24,
-    backgroundColor: colors.mint,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  emptyTitle: { fontSize: 18, fontWeight: '700', textAlign: 'center' },
-  emptyHint: {
-    color: colors.muted,
-    textAlign: 'center',
-    fontSize: 13,
-    maxWidth: 290,
-  },
-});
+const createStyles = (colors: Palette) =>
+  StyleSheet.create({
+    text: { fontSize: 14, lineHeight: 21, color: colors.ink },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    button: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingHorizontal: 18,
+      paddingVertical: 15,
+      minHeight: 50,
+      justifyContent: 'center',
+    },
+    secondary: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.line,
+    },
+    buttonText: {
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '700',
+      color: '#fff',
+    },
+    iconButton: {
+      height: 44,
+      width: 44,
+      borderRadius: 8,
+      backgroundColor: 'transparent',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    label: { fontSize: 12, fontWeight: '700', color: colors.label },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.inputLine,
+      borderRadius: 8,
+      padding: 13,
+      fontSize: 15,
+      color: colors.ink,
+      backgroundColor: colors.surface,
+      minHeight: 48,
+    },
+    chip: {
+      borderWidth: 1,
+      borderColor: colors.line,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      backgroundColor: colors.surface,
+    },
+    chipActive: { backgroundColor: colors.strong, borderColor: colors.strong },
+    chipText: { fontSize: 12, fontWeight: '600' },
+    badge: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: 9,
+      paddingVertical: 3,
+      borderRadius: 6,
+    },
+    empty: {
+      alignItems: 'center',
+      paddingVertical: 32,
+      paddingHorizontal: 22,
+      gap: 12,
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.line,
+    },
+    emptyIcon: {
+      width: 66,
+      height: 66,
+      borderRadius: 24,
+      backgroundColor: colors.mint,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 4,
+    },
+    emptyTitle: { fontSize: 18, fontWeight: '700', textAlign: 'center' },
+    emptyHint: {
+      color: colors.muted,
+      textAlign: 'center',
+      fontSize: 13,
+      maxWidth: 290,
+    },
+  });
+
+const lightStyles = createStyles(lightColors);
+const darkStyles = createStyles(darkColors);
+function useUIStyles() {
+  return useTheme().mode === 'dark' ? darkStyles : lightStyles;
+}

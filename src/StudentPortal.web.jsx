@@ -1,14 +1,25 @@
+import { useTheme, ThemeProvider } from './theme';
+import { ThemeSettings } from './ThemeSettings';
 /* eslint-env browser */
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Button, colors, Icon, Locale, Row, Txt } from './ui';
+import { Button, Icon, Locale, Row, Txt } from './ui';
 import { dateLabel, hours, money } from './domain';
 import { translate } from './i18n';
 import { LoginForm, portalCopy, portalRequest } from './Portal.web';
-import { styles as s } from './styles';
+import { useStyles } from './styles';
 
 export default function StudentPortal() {
+  return (
+    <ThemeProvider>
+      <StudentPortalContent />
+    </ThemeProvider>
+  );
+}
+function StudentPortalContent() {
+  const { colors } = useTheme();
+  const s = useStyles();
   const [language, setLanguage] = useState('fr');
   const [role, setRole] = useState(null),
     [dashboard, setDashboard] = useState(null);
@@ -33,7 +44,7 @@ export default function StudentPortal() {
           offline:
             'Connexion indisponible. Ce bilan reste affiché, mais il peut avoir changé. Réessayez en ligne.',
           history:
-            'Les heures prévues ne sont pas encore comptées comme effectuées. Un paiement anticipé apparaît comme une avance.',
+            'Les heures prévues ne sont pas encore comptées comme effectuées.',
         }
       : {
           title: 'وين وصلت في تكوينك.',
@@ -48,8 +59,7 @@ export default function StudentPortal() {
           details: 'المراحل الثلاثة',
           offline:
             'ما فماش اتصال. الحساب هذا ينجم يكون تبدّل، عاود جرّب بالإنترنت.',
-          history:
-            'الحصص المبرمجة ما تتحسبش كساعات تعدّاو. الخلاص المسبق يظهر كتسبقة.',
+          history: 'الحصص المبرمجة ما تتحسبش كساعات تعدّاو.',
         };
   const refresh = useCallback(async () => {
     setBusy(true);
@@ -149,7 +159,7 @@ export default function StudentPortal() {
                   accessibilityRole="alert"
                   style={{
                     padding: 14,
-                    backgroundColor: '#FFF1DF',
+                    backgroundColor: colors.warningSoft,
                     borderRadius: 10,
                   }}
                 >
@@ -167,7 +177,7 @@ export default function StudentPortal() {
                   </View>
                   <View
                     style={{
-                      backgroundColor: colors.ink,
+                      backgroundColor: colors.strong,
                       padding: 24,
                       borderRadius: 14,
                       gap: 12,
@@ -215,11 +225,6 @@ export default function StudentPortal() {
                       {money(dashboard.total, language)}
                     </Txt>
                   </Row>
-                  {!!dashboard.credit && (
-                    <Txt style={{ color: colors.green }}>
-                      {t('credit')} : {money(dashboard.credit, language)}
-                    </Txt>
-                  )}
                   {(dashboard.paid === null || dashboard.total === null) && (
                     <Txt style={s.muted}>{copy.incomplete}</Txt>
                   )}
@@ -252,11 +257,6 @@ export default function StudentPortal() {
                           {money(row.due, language)}
                         </Txt>
                       </Row>
-                      {!!row.credit && (
-                        <Txt>
-                          {t('credit')} : {money(row.credit, language)}
-                        </Txt>
-                      )}
                     </View>
                   ))}
                   <Txt style={s.muted}>{copy.history}</Txt>
@@ -282,6 +282,7 @@ export default function StudentPortal() {
                   <Txt style={s.muted}>{copy.readOnly}</Txt>
                 </>
               )}
+              <ThemeSettings />
               {!!role && (
                 <Button
                   secondary

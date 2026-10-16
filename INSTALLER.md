@@ -18,6 +18,8 @@ Copier ses identifiants et les remettre au candidat avec **https://permis-tn.ver
 
 Le mot de passe n’est affiché qu’après création ou réinitialisation. Le bouton **Réinitialiser le mot de passe** invalide l’ancien mot de passe et les sessions en cours. **Désactiver l’accès** bloque le compte une fois la synchronisation effectuée. Conserver le mot de passe moniteur pour soi.
 
+Dans **Réglages → Apparence**, choisir **Mode clair** ou **Mode sombre**. Le choix est conservé sur ce téléphone. Dans la fiche candidat, **Ajouter des heures** permet de saisir le nombre d’heures déjà effectuées, puis de choisir Payé ou Non payé pour leur montant total.
+
 Pour recevoir une mise à jour du site déjà installé, ouvrir l’app en ligne, fermer toutes ses fenêtres puis la rouvrir. Les anciens APK/IPA ci-dessous n’intègrent pas le portail élève ; utiliser la version Vercel pour cette fonction.
 
 ## Android natif

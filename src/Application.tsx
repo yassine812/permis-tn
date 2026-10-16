@@ -1,3 +1,5 @@
+import { useTheme } from './theme';
+import { ThemeSettings } from './ThemeSettings';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -37,18 +39,16 @@ import {
   Badge,
   Button,
   Chip,
-  colors,
   Empty,
   Field,
   Icon,
   IconButton,
   Locale,
   Row,
-  stageColor,
   Txt,
 } from './ui';
 import { LessonForm, RatesForm, SettingsForm, StudentForm } from './forms';
-import { styles as s } from './styles';
+import { useStyles } from './styles';
 import { Planner } from './planner';
 import { useReminders } from './useReminders';
 import { ReminderSettings } from './ReminderSettings';
@@ -87,6 +87,8 @@ const parentOf = (sheet: Sheet | null) =>
     : undefined;
 
 export default function Application() {
+  const { colors } = useTheme();
+  const s = useStyles();
   const [data, setData] = useState<Data | null>(null);
   usePortalSync(data);
   const [loadError, setLoadError] = useState(false);
@@ -298,13 +300,11 @@ export default function Application() {
   }
   function avatar(st: Student) {
     return (
-      <View
-        style={[s.avatar, { backgroundColor: `${stageColor[st.stage]}13` }]}
-      >
+      <View style={[s.avatar, { backgroundColor: `${colors[st.stage]}13` }]}>
         <Txt
           style={{
             fontWeight: '700',
-            color: stageColor[st.stage],
+            color: colors[st.stage],
             fontSize: 15,
           }}
         >
@@ -377,7 +377,7 @@ export default function Application() {
               width: 3,
               borderRadius: 3,
               backgroundColor:
-                l.status === 'cancelled' ? colors.line : stageColor[l.type],
+                l.status === 'cancelled' ? colors.line : colors[l.type],
             }}
           />
           <View style={{ flex: 1, gap: 7 }}>
@@ -655,7 +655,7 @@ export default function Application() {
           </Row>
           {error && !sheet ? (
             <View accessibilityRole="alert" style={s.error}>
-              <Txt style={{ color: '#A42B32' }}>{error}</Txt>
+              <Txt style={{ color: colors.red }}>{error}</Txt>
             </View>
           ) : null}
           {saved && !sheet && (
@@ -808,7 +808,7 @@ export default function Application() {
                                 borderColor: colors.green,
                               },
                               day === selectedDate && {
-                                backgroundColor: colors.ink,
+                                backgroundColor: colors.strong,
                               },
                             ]}
                           >
@@ -851,7 +851,7 @@ export default function Application() {
                           width: 6,
                           height: 6,
                           borderRadius: 3,
-                          backgroundColor: stageColor[stage],
+                          backgroundColor: colors[stage],
                         }}
                       />
                       <Txt style={s.smallMuted}>{t(stage)}</Txt>
@@ -910,6 +910,7 @@ export default function Application() {
                 <View style={[s.card, { padding: 20 }]}>
                   <SettingsForm data={data} commit={commit} busy={busy} />
                 </View>
+                <ThemeSettings />
                 <WebInstall />
                 <PortalSettings />
                 <StudentLoginLink />
@@ -969,7 +970,7 @@ export default function Application() {
                   <View
                     style={[
                       s.navIcon,
-                      item === tab && { backgroundColor: '#EAF0FF' },
+                      item === tab && { backgroundColor: colors.blueSoft },
                     ]}
                   >
                     <Icon
@@ -1019,7 +1020,7 @@ export default function Application() {
               </Row>
               {error ? (
                 <View accessibilityRole="alert" style={s.error}>
-                  <Txt style={{ color: '#A42B32' }}>{error}</Txt>
+                  <Txt style={{ color: colors.red }}>{error}</Txt>
                 </View>
               ) : null}
               {saved && (

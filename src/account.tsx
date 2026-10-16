@@ -1,3 +1,4 @@
+import { useTheme } from './theme';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import {
@@ -21,8 +22,8 @@ import {
 } from './domain';
 import { Commit, PaymentPrompt } from './forms';
 import { Key } from './i18n';
-import { Button, Chip, colors, Field, Row, Txt, useT } from './ui';
-import { styles as s } from './styles';
+import { Button, Chip, Field, Row, Txt, useT } from './ui';
+import { useStyles } from './styles';
 export { StudentAccount } from './profile';
 export function BillingForm({
   data,
@@ -37,6 +38,7 @@ export function BillingForm({
   commit: Commit;
   busy: boolean;
 }) {
+  const s = useStyles();
   const t = useT();
   const [paid, setPaid] = useState({
     code: amountText(student.paidByStage.code),
@@ -120,6 +122,8 @@ export function HoursForm({
   commit: Commit;
   busy: boolean;
 }) {
+  const { colors } = useTheme();
+  const s = useStyles();
   const t = useT();
   const [type, setType] = useState(entry?.type || stage || student.stage);
   const [duration, setDuration] = useState(entry ? hours(entry.duration) : '1');
@@ -169,18 +173,15 @@ export function HoursForm({
           />
         ))}
       </Row>
-      {entry ? (
-        <Field
-          label={t('hoursToAdd')}
-          value={duration}
-          onChange={setDuration}
-          numeric
-          ltr
-          maxLength={7}
-        />
-      ) : (
-        <Txt style={s.sectionTitle}>1 {t('hoursUnit')}</Txt>
-      )}
+      <Field
+        label={t('hoursToAdd')}
+        value={duration}
+        onChange={setDuration}
+        numeric
+        ltr
+        maxLength={7}
+        placeholder="Ex. 3"
+      />
       <Field
         label={t('date')}
         value={date}

@@ -1,3 +1,4 @@
+import { useTheme } from './theme';
 import React, { useContext, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import {
@@ -20,7 +21,7 @@ import {
   ValidationError,
 } from './domain';
 import { Key } from './i18n';
-import { Button, Chip, colors, Field, Locale, Row, Txt, useT } from './ui';
+import { Button, Chip, Field, Locale, Row, Txt, useT } from './ui';
 
 export type Commit = (
   change: (data: Data) => Data,
@@ -37,6 +38,7 @@ export function StudentForm({
   busy: boolean;
   onSaved?: (id: string) => void;
 }) {
+  const { colors } = useTheme();
   const t = useT();
   const [draft, setDraft] = useState<Student>(
     student || {
@@ -138,6 +140,7 @@ export function LessonForm({
   commit: Commit;
   busy: boolean;
 }) {
+  const { colors } = useTheme();
   const t = useT();
   const initial =
     data.students.find(s => s.id === initialStudent) ||
@@ -306,6 +309,7 @@ export function TimePicker({
   value: string;
   onChange: (time: string) => void;
 }) {
+  const { colors } = useTheme();
   const t = useT();
   const [hour, minute] = value.split(':');
   const [allTimes, setAllTimes] = useState(false);
@@ -318,7 +322,7 @@ export function TimePicker({
       style={{
         gap: 14,
         padding: 16,
-        backgroundColor: '#fff',
+        backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.line,
         borderRadius: 22,
@@ -353,7 +357,7 @@ export function TimePicker({
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: hour === h ? colors.ink : colors.bg,
+                backgroundColor: hour === h ? colors.strong : colors.bg,
               }}
             >
               <Txt
@@ -449,12 +453,13 @@ export function PaymentPrompt({
   back: () => void;
   choose: (paid: boolean) => void;
 }) {
+  const { colors } = useTheme();
   const t = useT();
   const language = useContext(Locale);
   return (
     <View style={{ gap: 22, paddingVertical: 16 }}>
       <Txt style={{ fontSize: 24, fontWeight: '700' }}>
-        {t('paymentPrompt')}
+        {t(duration === 60 ? 'paymentPrompt' : 'paymentPromptMany')}
       </Txt>
       <View
         style={{

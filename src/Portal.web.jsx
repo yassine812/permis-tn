@@ -1,3 +1,4 @@
+import { useTheme } from './theme';
 /* eslint-env browser */
 import React, {
   createContext,
@@ -9,10 +10,10 @@ import React, {
   useState,
 } from 'react';
 import { View } from 'react-native';
-import { Button, colors, Field, Locale, Txt } from './ui';
+import { Button, Field, Locale, Txt } from './ui';
 import { createStudentDashboard } from './studentDashboard';
 import { saveStudent } from './domain';
-import { styles as s } from './styles';
+import { useStyles } from './styles';
 import { rememberAudience } from './portalAudience.web';
 
 export const studentPortalURL = 'https://permis-tn.vercel.app/?espace=eleve';
@@ -291,6 +292,7 @@ export function usePortalSync(data) {
   }, [data, setData]);
 }
 export function LoginForm({ onLogin, owner = false }) {
+  const { colors } = useTheme();
   const language = useContext(Locale),
     text = portalCopy[language];
   const [username, setUsername] = useState(owner ? 'moniteur' : '');
@@ -327,7 +329,7 @@ export function LoginForm({ onLogin, owner = false }) {
             borderRadius: 8,
             border: `1px solid ${colors.line}`,
             fontSize: 16,
-            background: '#fff',
+            background: colors.surface,
             color: colors.ink,
           }}
         />
@@ -369,6 +371,8 @@ export function StudentLoginLink() {
   );
 }
 export function PortalSettings() {
+  const { colors } = useTheme();
+  const s = useStyles();
   const portal = useContext(Portal),
     language = useContext(Locale),
     text = portalCopy[language];
@@ -424,6 +428,8 @@ export function PortalSettings() {
   );
 }
 export function StudentAccess({ student, commit, busy }) {
+  const { colors } = useTheme();
+  const s = useStyles();
   const portal = useContext(Portal),
     text = portalCopy[useContext(Locale)];
   const account = portal.accounts.find(a => a.id === student.id);
