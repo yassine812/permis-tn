@@ -1,4 +1,7 @@
 import type { Data } from './domain';
+export function UpdateNotice() {
+  return null;
+}
 export function WebInstall(_props: { compact?: boolean }) {
   return null;
 }

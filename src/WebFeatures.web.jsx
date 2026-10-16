@@ -3,7 +3,13 @@ import { useTheme } from './theme';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Button, Locale, Txt } from './ui';
-import { getOfflineState, watchOfflineState, installApp } from './pwa.web';
+import {
+  getOfflineState,
+  watchOfflineState,
+  installApp,
+  checkForAppUpdate,
+  reloadUpdatedApp,
+} from './pwa.web';
 const copy = {
   fr: {
     title: 'Votre carnet, sur l’écran d’accueil',
@@ -17,7 +23,14 @@ const copy = {
     failed:
       'Mode hors connexion indisponible. Reconnectez-vous et rouvrez cette page.',
     update:
-      'Une mise à jour est prête. Fermez toutes les fenêtres Permis TN, puis rouvrez l’app.',
+      'Une mise à jour est prête. Enregistrez vos modifications avant d’actualiser.',
+    reload: 'Actualiser l’application',
+    check: 'Vérifier les mises à jour',
+    checking: 'Recherche en cours…',
+    checked:
+      'Vérification lancée. Toute nouvelle version sera proposée ici une fois prête.',
+    checkFailed:
+      'Vérification impossible. Réessayez avec une connexion Internet.',
     local:
       'Votre carnet complet reste sur cet appareil. Les bilans des élèves avec un accès activé sont synchronisés en ligne. Exportez régulièrement une sauvegarde du carnet.',
     reminders:
@@ -37,7 +50,12 @@ const copy = {
     preparing: 'نحضّروا الخدمة بلا إنترنت… خلّي الصفحة محلولة.',
     failed:
       'الخدمة بلا إنترنت موش جاهزة. ارجع اتّصل بالإنترنت وعاود حلّ الصفحة.',
-    update: 'فمّا تحديث جاهز. سكّر نوافذ Permis TN الكل وعاود حلّ التطبيق.',
+    update: 'فمّا تحديث جاهز. سجّل تغييراتك قبل ما تعاود تحلّ التطبيق.',
+    reload: 'حدّث التطبيق',
+    check: 'لوّج على تحديث',
+    checking: 'نلوّجوا على تحديث…',
+    checked: 'بدينا نثبتوا. أي نسخة جديدة تظهر هنا كي تولّي جاهزة.',
+    checkFailed: 'ما نجّمناش نثبتوا. عاود جرّب بالإنترنت.',
     local:
       'دفترك الكامل يبقى في جهازك. حسابات التلامذة اللي فعّلت دخولهم تتحدّث بالإنترنت. خزّن نسخة احتياطية بانتظام.',
     reminders:
@@ -47,6 +65,22 @@ const copy = {
     offline: 'إنت توّا بلا إنترنت',
   },
 };
+export function UpdateNotice() {
+  const { colors } = useTheme();
+  const text = copy[useContext(Locale)];
+  const [status, setStatus] = useState(getOfflineState);
+  useEffect(() => watchOfflineState(setStatus), []);
+  if (!status.update) return null;
+  return (
+    <View
+      accessibilityRole="alert"
+      style={{ backgroundColor: colors.blueSoft, padding: 14, gap: 10 }}
+    >
+      <Txt>{text.update}</Txt>
+      <Button compact title={text.reload} onPress={reloadUpdatedApp} />
+    </View>
+  );
+}
 const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches ||
   navigator.standalone === true;
@@ -58,6 +92,8 @@ export function WebInstall({ compact = false }) {
   const [standalone, setStandalone] = useState(isStandalone);
   const [instructions, setInstructions] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
+  const [checking, setChecking] = useState(false);
+  const [checkMessage, setCheckMessage] = useState('');
   useEffect(() => watchOfflineState(setStatus), []);
   useEffect(() => {
     document.documentElement.lang = language === 'ar' ? 'ar-TN' : 'fr-TN';
@@ -121,9 +157,28 @@ export function WebInstall({ compact = false }) {
           : text.preparing}
       </Txt>
       {!online && <Txt style={{ fontSize: 12 }}>{text.offline}</Txt>}
-      {status.update && <Txt style={{ fontSize: 12 }}>{text.update}</Txt>}
+      {status.update && <UpdateNotice />}
       {!compact && (
         <>
+          <Button
+            secondary
+            compact
+            disabled={checking || !online}
+            title={checking ? text.checking : text.check}
+            onPress={async () => {
+              setChecking(true);
+              setCheckMessage('');
+              try {
+                await checkForAppUpdate();
+                setCheckMessage(text.checked);
+              } catch {
+                setCheckMessage(text.checkFailed);
+              } finally {
+                setChecking(false);
+              }
+            }}
+          />
+          {!!checkMessage && <Txt style={{ fontSize: 12 }}>{checkMessage}</Txt>}
           <Txt style={{ fontSize: 12 }}>{text.local}</Txt>
           <Txt style={{ fontSize: 12 }}>{text.reminders}</Txt>
         </>

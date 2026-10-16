@@ -311,7 +311,12 @@ export function LoginForm({ onLogin, owner = false }) {
       <View style={{ gap: 8 }}>
         <label
           htmlFor={owner ? 'owner-password' : 'student-password'}
-          style={{ fontSize: 13, fontWeight: 700, color: colors.ink }}
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: colors.ink,
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+          }}
         >
           {text.password}
         </label>
@@ -329,6 +334,7 @@ export function LoginForm({ onLogin, owner = false }) {
             borderRadius: 8,
             border: `1px solid ${colors.line}`,
             fontSize: 16,
+            fontFamily: 'system-ui, -apple-system, sans-serif',
             background: colors.surface,
             color: colors.ink,
           }}
@@ -370,7 +376,7 @@ export function StudentLoginLink() {
     />
   );
 }
-export function PortalSettings() {
+export function PortalSettings({ embedded = false }) {
   const { colors } = useTheme();
   const s = useStyles();
   const portal = useContext(Portal),
@@ -378,9 +384,9 @@ export function PortalSettings() {
     text = portalCopy[language];
   const [error, setError] = useState('');
   return (
-    <View style={[s.card, { padding: 20, gap: 16 }]}>
-      <Txt style={s.sectionTitle}>{text.title}</Txt>
-      <Txt style={s.muted}>{text.privacy}</Txt>
+    <View style={embedded ? { gap: 16 } : [s.card, { padding: 20, gap: 16 }]}>
+      {!embedded && <Txt style={s.sectionTitle}>{text.title}</Txt>}
+      {!embedded && <Txt style={s.muted}>{text.privacy}</Txt>}
       {portal.role === 'owner' ? (
         <>
           <Txt style={{ color: colors.green, fontWeight: '700' }}>
@@ -423,7 +429,7 @@ export function PortalSettings() {
         </>
       )}
       {!!error && <Txt style={{ color: colors.red }}>{error}</Txt>}
-      <Txt style={s.muted}>{text.free}</Txt>
+      {!embedded && <Txt style={s.muted}>{text.free}</Txt>}
     </View>
   );
 }
@@ -443,7 +449,7 @@ export function StudentAccess({ student, commit, busy }) {
       <Txt style={s.sectionTitle}>{text.title}</Txt>
       <Txt style={s.muted}>{text.accessHint}</Txt>
       {portal.role !== 'owner' ? (
-        <PortalSettings />
+        <PortalSettings embedded />
       ) : (
         <>
           {account && (

@@ -20,7 +20,7 @@ Le mot de passe n’est affiché qu’après création ou réinitialisation. Le 
 
 Dans **Réglages → Apparence**, choisir **Mode clair** ou **Mode sombre**. Le choix est conservé sur ce téléphone. Dans la fiche candidat, **Ajouter des heures** permet de saisir le nombre d’heures déjà effectuées, puis de choisir Payé ou Non payé pour leur montant total.
 
-Pour recevoir une mise à jour du site déjà installé, ouvrir l’app en ligne, fermer toutes ses fenêtres puis la rouvrir. Les anciens APK/IPA ci-dessous n’intègrent pas le portail élève ; utiliser la version Vercel pour cette fonction.
+Pour recevoir une mise à jour du site déjà installé, ouvrir l’app en ligne puis utiliser Actualiser l’application lorsque le bandeau apparaît, après enregistrement des formulaires. Réglages propose aussi Vérifier les mises à jour. Pour une ancienne version sans ce bouton : quitter complètement l’app, la rouvrir en ligne pour télécharger la mise à jour, puis la quitter et la rouvrir une seconde fois. Ne pas effacer les données du navigateur. Les anciens APK/IPA ci-dessous n’intègrent pas le portail élève ; utiliser la version Vercel pour cette fonction.
 
 ## Android natif
 

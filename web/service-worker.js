@@ -8,9 +8,13 @@ const CACHE = PREFIX + VERSION;
 const appURL = path => new URL(path, self.registration.scope).href;
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(FILES.map(appURL))),
+    caches
+      .open(CACHE)
+      .then(cache => cache.addAll(FILES.map(appURL)))
+      .then(() => self.skipWaiting()),
   );
-  // Wait for existing windows to close; never reload an unsaved form.
+  // Prepare the next navigation even if Safari keeps another window alive.
+  // This never reloads a page or touches the local ledger.
 });
 self.addEventListener('activate', event => {
   event.waitUntil(

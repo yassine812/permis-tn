@@ -1,5 +1,6 @@
 import { useTheme, ThemeProvider } from './theme';
 import { ThemeSettings } from './ThemeSettings';
+import { UpdateNotice } from './WebFeatures';
 /* eslint-env browser */
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -125,6 +126,7 @@ function StudentPortalContent() {
                 />
               </Row>
               {busy && !dashboard && <Txt>{copy.loading}</Txt>}
+              <UpdateNotice />
               {role === 'owner' ? (
                 <>
                   <Txt>{copy.owner}</Txt>

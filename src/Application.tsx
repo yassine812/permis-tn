@@ -52,7 +52,12 @@ import { useStyles } from './styles';
 import { Planner } from './planner';
 import { useReminders } from './useReminders';
 import { ReminderSettings } from './ReminderSettings';
-import { WebInstall, BackupDownload, BackupFilePicker } from './WebFeatures';
+import {
+  WebInstall,
+  BackupDownload,
+  BackupFilePicker,
+  UpdateNotice,
+} from './WebFeatures';
 import { StudentAccount, BillingForm, HoursForm } from './account';
 import {
   PortalSettings,
@@ -658,6 +663,7 @@ export default function Application() {
               <Txt style={{ color: colors.red }}>{error}</Txt>
             </View>
           ) : null}
+          <UpdateNotice />
           {saved && !sheet && (
             <View accessibilityLiveRegion="polite" style={s.success}>
               <Txt style={{ color: colors.green, fontSize: 12 }}>
@@ -1023,6 +1029,7 @@ export default function Application() {
                   <Txt style={{ color: colors.red }}>{error}</Txt>
                 </View>
               ) : null}
+              <UpdateNotice />
               {saved && (
                 <View accessibilityLiveRegion="polite" style={s.success}>
                   <Txt style={{ color: colors.green, fontSize: 12 }}>

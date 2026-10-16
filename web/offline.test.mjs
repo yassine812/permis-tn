@@ -16,11 +16,15 @@ function runtime({ failInstall = false, workerScope = scope } = {}) {
   ]);
   let network = 0;
   let precached = [];
+  let skippedWaiting = false;
   const context = {
     URL,
     self: {
       registration: { scope: workerScope },
       clients: { claim: async () => {} },
+      skipWaiting: async () => {
+        skippedWaiting = true;
+      },
       addEventListener: (name, listener) => {
         listeners[name] = listener;
       },
@@ -78,6 +82,9 @@ function runtime({ failInstall = false, workerScope = scope } = {}) {
     get network() {
       return network;
     },
+    get skippedWaiting() {
+      return skippedWaiting;
+    },
   };
 }
 test('all install files exist and work beneath the GitHub repository path', async () => {
@@ -111,10 +118,17 @@ test('updates remove only this app cache and leave unrelated caches alone', asyn
   assert.equal(worker.cacheNames.size, 2);
 });
 test('an incomplete offline installation fails instead of claiming readiness', async () => {
-  await assert.rejects(
-    runtime({ failInstall: true }).lifecycle('install'),
-    /offline/,
-  );
+  const worker = runtime({ failInstall: true });
+  await assert.rejects(worker.lifecycle('install'), /offline/);
+  assert.equal(worker.skippedWaiting, false);
+});
+
+test('a complete update activates without waiting for every Safari window to close', async () => {
+  const worker = runtime();
+  assert.equal(worker.skippedWaiting, false);
+  await worker.lifecycle('install');
+  assert.equal(worker.skippedWaiting, true);
+  assert.ok(worker.precached.includes(url('index.html')));
 });
 test('student writes and other origins are never intercepted', async () => {
   const worker = runtime();

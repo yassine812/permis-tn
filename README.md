@@ -10,7 +10,7 @@ Ouvrir **https://permis-tn.vercel.app/** sur le téléphone.
 
 Attendre **« Prêt à fonctionner hors connexion »** avant de couper Internet. Les élèves, séances, tarifs, examens et paiements fonctionnent ensuite hors ligne. Cette version web ne nécessite pas de renouvellement de signature tous les 7 jours. Les rappels à 06:00 et avant/après les séances ne sont pas disponibles quand elle est fermée.
 
-Le carnet complet reste dans IndexedDB sur chaque appareil. Sur Vercel, les bilans des élèves dont l’accès est activé sont synchronisés dans un stockage privé, pour consultation avec identifiant et mot de passe. Cette synchronisation ne transfère pas le carnet complet entre téléphones. Exporter régulièrement une sauvegarde JSON dans Réglages : effacer les données du navigateur peut les supprimer. Installer d’abord l’app puis y saisir ses données ; si Safari et l’app installée affichent des données différentes, utiliser l’export/import JSON pour les transférer. Les mises à jour se téléchargent en ligne et prennent effet après fermeture de toutes les fenêtres Permis TN ; elles ne rechargent pas un formulaire ouvert.
+Le carnet complet reste dans IndexedDB sur chaque appareil. Sur Vercel, les bilans des élèves dont l’accès est activé sont synchronisés dans un stockage privé, pour consultation avec identifiant et mot de passe. Cette synchronisation ne transfère pas le carnet complet entre téléphones. Exporter régulièrement une sauvegarde JSON dans Réglages : effacer les données du navigateur peut les supprimer. Installer d’abord l’app puis y saisir ses données ; si Safari et l’app installée affichent des données différentes, utiliser l’export/import JSON pour les transférer. Les mises à jour se téléchargent en ligne et deviennent actives pour le prochain rechargement, même si une autre fenêtre Safari reste ouverte. Un bandeau propose Actualiser l’application ; enregistrer ses formulaires avant de le toucher. Aucun rechargement automatique ni effacement du carnet. Réglages permet aussi de vérifier les mises à jour.
 
 Les données de l’ancienne adresse GitHub Pages ne se transfèrent pas automatiquement vers Vercel. Exporter une sauvegarde depuis l’ancienne adresse, puis la restaurer sur la nouvelle.
 
@@ -140,7 +140,7 @@ npm run typecheck
 npm test -- --runInBand --testTimeout=15000
 npm run lint -- --quiet
 npm run web:build
-node --test web/offline.test.mjs server/*.test.mjs
+node --test web/*.test.mjs server/*.test.mjs
 npm run bundle:android -- --max-workers 2
 npm run bundle:ios -- --max-workers 2
 ```
